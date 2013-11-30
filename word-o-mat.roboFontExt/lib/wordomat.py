@@ -4,6 +4,7 @@
 
 from vanilla import * 
 from mojo.UI import CurrentSpaceCenter
+from mojo.extensions import ExtensionBundle
 from robofab.interface.all.dialogs import Message
 from random import choice
 import re
@@ -26,10 +27,11 @@ class WordomatWindow:
         self.randomize = True
         self.outputWords = []
         
-        fileName      = 'resources/ukacd.txt'
+        fileName      = 'ukacd'
         contentLimit  = '*****' # If word list file contains a header (e.g. copyright notice), start looking for content after this delimiter
         
-        fo = open(fileName)
+        bundle = ExtensionBundle("word-o-mat")
+        fo = open(bundle.getResourceFilePath(fileName, ext="txt"))
         lines = fo.read()
         fo.close()
         self.allWords = lines.splitlines()
