@@ -10,14 +10,22 @@
 </head>
 
 <body>
-<h1>word-o-mat v1.0</h1>
+<h1>word-o-mat v1.1</h1>
 
+<p>(Dec 1, 2013)</p>
 <p>word-o-mat is an extension for RoboFont that generates words for use in type sketching, spacing, testing etc. This is my first RF extension, supplied without any promises and all that jazz. If you find any bugs or have suggestions for future development, please either fix them or <a href="mailto:altairas_eye@mac.com">send me a line</a>, thx :)</p>
 
 <h2>Interface Elements</h2> 
 
-<p><strong>Word Count / Length</strong></p>
-<p>The first row lets you specify the amount of words that should be generated. The boxes in the second row let you adjust minimal and maximal length of created words. Both these numbers are inclusive &ndash; so specifying 3 and 5 for instance will yield three, four and five letter words.<br />
+<p><strong>Word Count</strong></p>
+<p>The first row lets you specify the amount of words that should be generated. (If you're using these in the Space Center, it's better not to use extremely large numbers of words.)</p>
+
+<p><strong>Word Length</strong></p>
+<p>The boxes in the second row let you adjust minimal and maximal length of created words. Both these numbers are inclusive &ndash; so specifying 3 and 5 for instance will yield three, four and five letter words.<br />
+</p>
+
+<p><strong>Case</strong></p>
+<p>Select whether you want to look at words as they are provided, or converted to all lowercase, all uppercase, or with their first letter capitalized.<br />
 </p>
 
 <p><strong>Required Characters</strong></p>
@@ -41,22 +49,19 @@
 <h2>MEQ (Most Expected Questions)</h2> 
 
 <p><strong>Where is the output?</strong></p>
-<p>If you have a Space Center window open in RoboFont, the word-o-mat output goes directly there, using the current font. If no Space Center (or no font) is open, word-o-mat will output to the Output Window.</p>
+<p>Normally the word-o-mat output goes to your Space Center window, using the current font. If no font is open, word-o-mat will output to the Output Window.</p>
 
 <p><strong>Where do the words come from?</strong></p>
 <p>word-o-mat uses a comprehensive English-language word list originally made for crossword solvers, the <a href="http://www.crosswordman.com/wordlist.html">UK Advanced Cryptics Dictionary (UKACD)</a>. At around 250.000 lines, it is a fairly long freely redistributable word list. Note that the UKACD also includes expressions that span multiple words (with a space); word-o-mat disregards those entries, since it looks strictly for words.</p>
 
 <p><strong>Can I use a different word list?</strong></p>
-<p>You can. It needs to be a text file with words on separate lines; drop it inside the <code>/resources/</code> folder in your word-o-mat installation, and set the <code>fileName</code> and <code>contentLimit</code> variables in the main <code>word-o-mat.py</code> script accordingly.</p>
+<p>You can. It needs to be a text file with words on separate lines; drop it inside the <code>/resources/</code> folder in your word-o-mat installation, and set the <code>fileName</code> and <code>contentLimit</code> variables in the main <code>wordomat.py</code> script accordingly.</p>
 
 <p><strong>Can I use word-o-mat for other languages?</strong></p>
 <p>There are two things to consider. One is the word list that word-o-mat uses to find words. This can be replaced, see above, so you are free to use a list using words in a language other than English. The other consideration however is that word-o-mat does not yet support specifying characters outside the basic a&ndash;z/A&ndash;Z range as search criteria. This may be fixed in future versions if there is interest.</p>
 
 <p><strong>word-o-mat makes my RoboFont reeeeally slow.</strong></p>
 <p>Are you outputting hundreds of words into your Space Center? Maybe try a few less.</p>
-
-<p><strong>It says I have no font open, but I do!</strong></p>
-<p>Did you open a font after launching word-o-mat? It currently only checks for open/current fonts once when it&rsquo;s launched, so you&rsquo;ll have to close its little window and open it again. Sorry!</p>
 
 </body>
 </html>

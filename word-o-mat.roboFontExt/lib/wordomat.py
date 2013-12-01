@@ -3,14 +3,14 @@
 # v1.0 / Nina Stössinger 29.11.2013 / with thanks to Just van Rossum / KABK t]m 1314
 
 from vanilla import * 
-from mojo.UI import CurrentSpaceCenter
+from mojo.UI import OpenSpaceCenter
 from mojo.extensions import ExtensionBundle
+from mojo.events import addObserver, removeObserver
 from robofab.interface.all.dialogs import Message
 from random import choice
 import re
 from wordcheck import wordChecker
 
-f = CurrentFont()
 warned = False
 
 class WordomatWindow:
@@ -19,6 +19,7 @@ class WordomatWindow:
         self.wordCount = 20
         self.minLength = 3
         self.maxLength = 10
+        self.case = 0
         self.requiredLetters = ['a', 'o']
         self.bannedLetters = ['-']
         self.requiredGroups = [[], [], []]
@@ -48,23 +49,28 @@ class WordomatWindow:
             ["Ball-and-Stick", ["b", "d", "p", "q"]], 
             ["Arches", ["n", "m", "h", "u"]], 
             ["Diagonals", ["v", "w", "x", "y"]]]
+            
+        addObserver(self, "fontOpened", "fontDidOpen")
+        addObserver(self, "fontClosed", "fontWillClose")
         
         # dialog window
-        self.w = FloatingWindow((325, 488), 'word-o-mat')
+        self.w = FloatingWindow((325, 518), 'word-o-mat')
         interval = 28
         padding = 10
         boxPadding = 3
         y = 10
         
-        self.w.basicsBox = Box((padding, y, -padding, interval*2.75))
+        self.w.basicsBox = Box((padding, y, -padding, interval*3.85))
         self.w.basicsBox.wcText = TextBox((boxPadding, 5, 170, 22), 'Make this many words:') 
         self.w.basicsBox.lenTextOne = TextBox((boxPadding, 5 + interval * 1.25, 90, 22), 'Word length:') 
         self.w.basicsBox.lenTextTwo = TextBox((141, 5 + interval * 1.25, 20, 22), 'to') 
         self.w.basicsBox.lenTextThree = TextBox((212, 5 + interval * 1.25, 80, 22), 'characters') 
         self.w.basicsBox.wordCount = EditText((160, 3, 40, 22), text=self.wordCount, placeholder=str(20))
         self.w.basicsBox.minLength = EditText((95, 3 + interval * 1.25, 40, 22), text=self.minLength, placeholder=str(3))
-        self.w.basicsBox.maxLength = EditText((165, 3 + interval * 1.25, 40, 22), text=self.maxLength, placeholder=str(10))     
-        y += interval*3.125
+        self.w.basicsBox.maxLength = EditText((165, 3 + interval * 1.25, 40, 22), text=self.maxLength, placeholder=str(10))  
+        self.w.basicsBox.caseLabel = TextBox((boxPadding, 3 + interval * 2.5, 45, 22), 'Case:') 
+        self.w.basicsBox.case = PopUpButton((50, 2 + interval * 2.5, -10, 20), ["leave as is", "all lowercase", "Capitalize", "ALL CAPS"])
+        y += interval*4.2
 
         self.w.reqBox = Box((padding, y, -padding, interval*8.9))
         labelY = [5, 5 + interval*2.25, 5 + interval*6.375]
@@ -94,20 +100,21 @@ class WordomatWindow:
             y3 = i*interval*.875
             attrName = chkNameTemplate % i
             setattr(self.w.optionsBox, attrName, CheckBox((boxPadding, y3+3, -boxPadding, 22), chkLabel[i], value=chkValues[i])) 
-        self.w.optionsBox.checkbox0.enable(f)   
+        self.w.optionsBox.checkbox0.enable(CurrentFont()) 
         y += interval*3.5
         self.w.submit = Button((10,y,-10, 22), 'words please!', callback=self.makeWords)
+        self.w.bind("close", self.windowClose)
         self.w.open()
     
-    def fontCharacters(self):
+    def fontCharacters(self, font):
         global warned
-        if not f:
+        if not font:
             if warned == False:
                 Message("No open fonts found; word-o-mat will output to the Output Window.")
                 warned = True
             return []
         charset = []
-        for g in f:
+        for g in font:
             charset.append(g.name)
         return charset
         
@@ -136,9 +143,12 @@ class WordomatWindow:
                 
     def makeWords(self, sender=None):
         global warned
+        self.f = CurrentFont()
+        self.fontChars = self.fontCharacters(self.f)
         self.wordCount = self.getIntegerValue(self.w.basicsBox.wordCount)
         self.minLength = self.getIntegerValue(self.w.basicsBox.minLength)
         self.maxLength = self.getIntegerValue(self.w.basicsBox.maxLength)
+        self.case = self.w.basicsBox.case.get()
         self.requiredLetters = self.getInputString(self.w.reqBox.mustLettersBox, False) 
         self.requiredGroups[0] = self.getInputString(self.w.reqBox.group1box, True) 
         self.requiredGroups[1] = self.getInputString(self.w.reqBox.group2box, True) 
@@ -148,7 +158,6 @@ class WordomatWindow:
         self.limitToCharset = self.w.optionsBox.checkbox0.get()
         self.banRepetitions = self.w.optionsBox.checkbox1.get()
         self.randomize = self.w.optionsBox.checkbox2.get()
-        self.fontChars = self.fontCharacters()
         self.outputWords = [] #initialize/empty
         
         checker = wordChecker(self.limitToCharset, self.fontChars, self.requiredLetters, self.requiredGroups, self.bannedLetters, self.banRepetitions, self.minLength, self.maxLength)
@@ -160,6 +169,9 @@ class WordomatWindow:
                     w = choice(self.allWords)
                 else:
                     w = i
+                if self.case == 1:   w = w.lower()
+                elif self.case == 2: w = w.title()
+                elif self.case == 3: w = w.upper()
                 if checker.checkWord(w, self.outputWords):
                     self.outputWords.append(w)  
         # output
@@ -167,15 +179,23 @@ class WordomatWindow:
             print "word-o-mat: No matching words found <sad trombone>"
         else:
             outputString = " ".join(self.outputWords)
-            c = CurrentSpaceCenter()
             try:
-                c.setRaw(outputString)
+                sp = OpenSpaceCenter(CurrentFont())
+                sp.setRaw(outputString)
             except:
-                if f:
-                    if warned == False:
-                        Message("No open Space Center found; word-o-mat will output to the Output Window.")
-                        warned = True
                 print "word-o-mat:", outputString
                 pass
     
+    def fontOpened(self, info):
+        self.w.optionsBox.checkbox0.enable(True)
+         
+    def fontClosed(self, info):
+        if len(AllFonts()) <= 1:
+            self.w.optionsBox.checkbox0.set(False) 
+            self.w.optionsBox.checkbox0.enable(False) 
+         
+    def windowClose(self, sender):
+        removeObserver(self, "fontDidOpen")
+        removeObserver(self, "fontWillClose")
+                
 w = WordomatWindow()
