@@ -29,8 +29,12 @@
 	<key>name</key>
 	<string>word-o-mat</string>
 	<key>timeStamp</key>
-	<real>1385880363</real>
+	<real>1386103184</real>
 	<key>version</key>
-	<string>1.1</string>
+	<string>1.1.1</string>
+	<key>repository</key>
+    <string>ninastoessinger/word-o-mat</string>
+    <key>extensionPath</key>
+    <string>word-o-mat.roboFontExt</string>
 </dict>
 </plist>
