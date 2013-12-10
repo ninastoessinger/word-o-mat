@@ -5,4 +5,5 @@ Urgently need words that contain "q" but not "u"? Or words that use an "a", a "g
 
 ![word-o-mat screenshot](/screenshot.png)
 
-This is my first RF extension, supplied without any promises and all that jazz. If you find any bugs or have suggestions for future development, please either fix them or send me a line, thx :)
+This is my first RF extension, supplied without any promises and all that jazz. If you find any bugs or have suggestions for future development, please get in touch, or fix them yourself :)
+Please note also that I assume no responsibility for inappropriate words rendered by this extension – I have not compiled the word lists but used existing ones.
