@@ -1,46 +1,55 @@
 # Tool for Robofont to generate test words for type testing, sketching etc.
 # Default wordlist ukacd.txt is from http://www.crosswordman.com/wordlist.html
-# v1.0 / Nina Stössinger 29.11.2013 / with thanks to Just van Rossum / KABK t]m 1314
+# I assume no responsibility for inappropriate words found on that list and rendered by this script!
+# v1.2 / Nina Stössinger 10.12.2013 / with thanks to Just van Rossum / KABK t]m 1314
 
-from vanilla import * 
-from mojo.UI import OpenSpaceCenter
-from mojo.extensions import ExtensionBundle
-from mojo.events import addObserver, removeObserver
-from robofab.interface.all.dialogs import Message
-from random import choice
+import codecs
 import re
-from wordcheck import wordChecker
+from mojo.events import addObserver, removeObserver
+from mojo.extensions import ExtensionBundle
+from mojo.roboFont import OpenWindow
+from mojo.UI import OpenSpaceCenter
+from random import choice
+from robofab.interface.all.dialogs import Message
+from vanilla import * 
+from vanilla.dialogs import getFile
+from wordcheck import wordChecker 
 
 warned = False
 
 class WordomatWindow:
     def __init__(self):
-        # set defaults
         self.wordCount = 20
         self.minLength = 3
-        self.maxLength = 10
+        self.maxLength = 15
         self.case = 0
-        self.requiredLetters = ['a', 'o']
-        self.bannedLetters = ['-']
+        self.requiredLetters = []
+        self.bannedLetters = []
         self.requiredGroups = [[], [], []]
-        self.limitToCharset = False
+        self.limitToCharset = True if CurrentFont() else False
         self.banRepetitions = False
         self.randomize = True
+        self.allWords = []
         self.outputWords = []
         
+        # read included textfile
         fileName      = 'ukacd'
         contentLimit  = '*****' # If word list file contains a header (e.g. copyright notice), start looking for content after this delimiter
-        
         bundle = ExtensionBundle("word-o-mat")
         fo = open(bundle.getResourceFilePath(fileName, ext="txt"))
         lines = fo.read()
         fo.close()
-        self.allWords = lines.splitlines()
+        self.ukacdWords = lines.splitlines()
         try:
-            contentStart = self.allWords.index(contentLimit) + 1
-            self.allWords = self.allWords[contentStart:]
+            contentStart = self.ukacdWords.index(contentLimit) + 1
+            self.ukacdWords = self.ukacdWords[contentStart:]
         except ValueError:
             pass
+            
+        # read user dictionary
+        userFile = open('/usr/share/dict/words', 'r')
+        lines = userFile.read()
+        self.userWords = lines.splitlines()
         
         # preset character groups
         groupPresets = [
@@ -54,31 +63,35 @@ class WordomatWindow:
         addObserver(self, "fontClosed", "fontWillClose")
         
         # dialog window
-        self.w = FloatingWindow((325, 518), 'word-o-mat')
-        interval = 28
-        padding = 10
-        boxPadding = 3
+        self.w = FloatingWindow((325, 482), 'word-o-mat')
+        interval = 25
+        padd = 10
+        bPadd = 3
         y = 10
         
-        self.w.basicsBox = Box((padding, y, -padding, interval*3.85))
-        self.w.basicsBox.wcText = TextBox((boxPadding, 5, 170, 22), 'Make this many words:') 
-        self.w.basicsBox.lenTextOne = TextBox((boxPadding, 5 + interval * 1.25, 90, 22), 'Word length:') 
+        self.w.basicsBox = Box((padd, y, -padd, interval*4.85))
+        self.w.basicsBox.wcText = TextBox((bPadd, 5, 170, 22), 'Make this many words:') 
+        self.w.basicsBox.lenTextOne = TextBox((bPadd, 5 + interval * 1.25, 90, 22), 'Word length:') 
         self.w.basicsBox.lenTextTwo = TextBox((141, 5 + interval * 1.25, 20, 22), 'to') 
         self.w.basicsBox.lenTextThree = TextBox((212, 5 + interval * 1.25, 80, 22), 'characters') 
         self.w.basicsBox.wordCount = EditText((160, 3, 40, 22), text=self.wordCount, placeholder=str(20))
         self.w.basicsBox.minLength = EditText((95, 3 + interval * 1.25, 40, 22), text=self.minLength, placeholder=str(3))
         self.w.basicsBox.maxLength = EditText((165, 3 + interval * 1.25, 40, 22), text=self.maxLength, placeholder=str(10))  
-        self.w.basicsBox.caseLabel = TextBox((boxPadding, 3 + interval * 2.5, 45, 22), 'Case:') 
-        self.w.basicsBox.case = PopUpButton((50, 2 + interval * 2.5, -10, 20), ["leave as is", "all lowercase", "Capitalize", "ALL CAPS"])
-        y += interval*4.2
+        self.w.basicsBox.caseLabel = TextBox((bPadd, 3 + interval * 2.55, 60, 22), 'Case:') 
+        self.w.basicsBox.case = PopUpButton((65, 2 + interval * 2.55, -10, 20), ["leave as is", "all lowercase", "Capitalize", "ALL CAPS"])
+        self.w.basicsBox.sourceLabel = TextBox((bPadd, 6 + interval * 3.55, 60, 22), 'Source:', sizeStyle="mini") 
+        self.w.basicsBox.source = PopUpButton((65, 2 + interval * 3.55, -10, 20), ["Included word list (bigger)", "User Dictionary (faster)", "Custom..."], sizeStyle="mini", callback=self.changeSourceCallback)
+        y += interval*5.2
 
-        self.w.reqBox = Box((padding, y, -padding, interval*8.9))
-        labelY = [5, 5 + interval*2.25, 5 + interval*6.375]
-        labelText = ["Required characters:", "Groups (require at least one in each group):", "Excluded characters:"]
+        self.w.reqBox = Box((padd, y, -padd, interval*8.625))
+        labelY = [5, 7 + interval*2, 6 + interval*6]
+        labelText = ["Obligatory characters:", "Groups:", "Banned characters:", "(must be in each word)", "(require one per group for each word)", "(must not occur)"]
         for i in range(3):
-            setattr(self.w.reqBox, "reqLabel%s" % i, TextBox((boxPadding, labelY[i], -boxPadding, 22), labelText[i]))
-        self.w.reqBox.mustLettersBox = EditText((boxPadding, 5 + interval*.8, -boxPadding, 22), text=", ".join(self.requiredLetters))
-        self.w.reqBox.notLettersBox = EditText((boxPadding, 5 + interval * 7.175, -boxPadding, 22), text=", ".join(self.bannedLetters))
+            setattr(self.w.reqBox, "reqLabel%s" % i, TextBox((bPadd, labelY[i], -bPadd, 22), labelText[i]))
+        for i in range(3,6):
+            setattr(self.w.reqBox, "reqLabel%s" % i, TextBox((bPadd+50, labelY[i-3]+5, -bPadd, 22), labelText[i], sizeStyle="mini", alignment="right"))   
+        self.w.reqBox.mustLettersBox = EditText((bPadd+2, 2 + interval, -bPadd, 19), text=", ".join(self.requiredLetters), sizeStyle="small")
+        self.w.reqBox.notLettersBox = EditText((bPadd+2, 3 + interval * 7, -bPadd, 19), text=", ".join(self.bannedLetters), sizeStyle="small")
         
         y2 = interval*2.25
         attrNameTemplate = "group%sbox"
@@ -89,29 +102,38 @@ class WordomatWindow:
             if len(self.requiredGroups[i]) > 0:
                 optionsList.insert(0, "Current: " + ", ".join(self.requiredGroups[i]))
             attrName = attrNameTemplate % j
-            setattr(self.w.reqBox, attrName, ComboBox((boxPadding, y2-3, -boxPadding, 22), optionsList)) 
-        y += interval*9.25
+            setattr(self.w.reqBox, attrName, ComboBox((bPadd+2, y2-4, -bPadd, 19), optionsList, sizeStyle="small")) 
+        y += interval*9
           
-        self.w.optionsBox = Box((padding, y, -padding, interval*3.125))
+        self.w.optionsBox = Box((padd, y, -padd, interval*3.125))
         chkNameTemplate = "checkbox%s"
         chkLabel = ["Limit to characters available in current font", "No repeating characters", "Randomize output"]
         chkValues = [self.limitToCharset, self.banRepetitions, self.randomize]
         for i in range(3):
             y3 = i*interval*.875
             attrName = chkNameTemplate % i
-            setattr(self.w.optionsBox, attrName, CheckBox((boxPadding, y3+3, -boxPadding, 22), chkLabel[i], value=chkValues[i])) 
-        self.w.optionsBox.checkbox0.enable(CurrentFont()) 
-        y += interval*3.5
+            setattr(self.w.optionsBox, attrName, CheckBox((bPadd, y3+3, -bPadd, 22), chkLabel[i], value=chkValues[i])) 
+        self.w.optionsBox.checkbox0.enable(CurrentFont())
+        y += interval*3.45
         self.w.submit = Button((10,y,-10, 22), 'words please!', callback=self.makeWords)
         self.w.bind("close", self.windowClose)
         self.w.open()
+        
+    def changeSourceCallback(self, sender):
+        if sender.get() == 2: # Custom word list - this is very much in beta
+            filePath = getFile(title="Load custom word list", messageText="Select a text file with words on separate lines", fileTypes=["txt"])[0]
+            try:
+                fo = codecs.open(filePath, mode="r", encoding="utf-8")
+                lines = fo.read()
+            except UnicodeDecodeError:
+                fo = open(filePath, 'r')
+                lines = fo.read()
+            fo.close()
+            self.customWords = lines.splitlines()
+            #self.customWords = [line.decode('utf-8') for line in lines.splitlines()] # this throws errors
     
     def fontCharacters(self, font):
-        global warned
         if not font:
-            if warned == False:
-                Message("No open fonts found; word-o-mat will output to the Output Window.")
-                warned = True
             return []
         charset = []
         for g in font:
@@ -129,7 +151,7 @@ class WordomatWindow:
         try:
             result = [str(s) for s in result if s]
         except UnicodeEncodeError:
-            print "Sorry! Characters beyond a-z/A-Z are not currently supported. Please adjust your input."
+            Message ("Sorry! Characters beyond a-z/A-Z are not currently supported. Please adjust your input.")
             result = []
         return result
         
@@ -140,6 +162,68 @@ class WordomatWindow:
             returnValue = int(field.getPlaceholder())
             field.set(returnValue)
         return returnValue
+        
+    def checkReqBanned(self, required, banned):
+        for b in banned:
+            if b in required:
+                Message ("Conflict: Character \"%s\" is both required and banned. Please fix." % b)
+                return False
+        return True
+        
+    def checkReqVsFont(self, required, limitTo, fontChars):
+        if limitTo == False:
+            return True
+        else:
+            for c in required:
+                if not c in fontChars:
+                    Message ("Conflict: Character \"%s\" was specified as obligatory, but not found in the font." % c)
+                    return False
+            return True
+        
+    def checkReqVsLen(self, required, maxLength):
+        if len(required) > maxLength:
+            Message ("Conflict: Obligatory characters exceed maximum word length. Please revise.")
+            return False
+        return True
+        
+    def checkReqVsCase(self, required, case):
+        if case == 1: # all lowercase
+            lc = re.compile("[a-z]")
+            for c in required:
+                m = lc.match(c)
+                if not m:
+                    Message ("Conflict: You appear to want all-lowercase words, but have specified non-lowercase characters as required. Please revise.")
+                    return False
+            return True
+        elif case == 3: # all caps
+            uc = re.compile("[A-Z]")
+            for c in required:
+                m = uc.match(c)
+                if not m:
+                    Message ("Conflict: You appear to want words in all-caps, but have specified lowercase characters as required. Please revise.")
+                    return False
+            return True
+        else:
+            return True
+        
+    def checkMinVsMax(self, minLength, maxLength):
+        if not minLength < maxLength:
+            Message ("Confusing input for minimal/maximal word length. Please fix.")
+            return False
+        return True
+        
+    def checkInput(self, limitTo, fontChars, required, banned, minLength, maxLength, case):
+        requirements = [
+            (self.checkReqBanned, [required, banned]),    
+            (self.checkReqVsLen, [required, maxLength]),
+            (self.checkReqVsFont, [required, limitTo, fontChars]),
+            (self.checkReqVsCase, [required, case]),
+            (self.checkMinVsMax, [minLength, maxLength]),
+        ]
+        for reqFunc, args in requirements:
+            if not reqFunc(*args):
+                return False
+        return True
                 
     def makeWords(self, sender=None):
         global warned
@@ -160,34 +244,53 @@ class WordomatWindow:
         self.randomize = self.w.optionsBox.checkbox2.get()
         self.outputWords = [] #initialize/empty
         
-        checker = wordChecker(self.limitToCharset, self.fontChars, self.requiredLetters, self.requiredGroups, self.bannedLetters, self.banRepetitions, self.minLength, self.maxLength)
-        for i in self.allWords:
-            if len(self.outputWords) >= self.wordCount:
-                break
+        self.source = self.w.basicsBox.source.get()
+        if self.source == 0:
+            self.allWords = self.ukacdWords 
+        elif self.source == 1:
+            self.allWords = self.userWords
+        elif self.source == 2:
+            if self.customWords:
+                self.allWords = self.customWords
             else:
-                if self.randomize:
-                    w = choice(self.allWords)
+                self.allWords = self.ukacdWords 
+                self.w.basicsBox.source.set(0)
+        
+        if self.checkInput(self.limitToCharset, self.fontChars, self.requiredLetters, self.bannedLetters, self.minLength, self.maxLength, self.case) == True:
+        
+            checker = wordChecker(self.limitToCharset, self.fontChars, self.requiredLetters, self.requiredGroups, self.bannedLetters, self.banRepetitions, self.minLength, self.maxLength)
+            for i in self.allWords:
+                if len(self.outputWords) >= self.wordCount:
+                    break
                 else:
-                    w = i
-                if self.case == 1:   w = w.lower()
-                elif self.case == 2: w = w.title()
-                elif self.case == 3: w = w.upper()
-                if checker.checkWord(w, self.outputWords):
-                    self.outputWords.append(w)  
-        # output
-        if len(self.outputWords) < 1:
-            print "word-o-mat: No matching words found <sad trombone>"
+                    if self.randomize:
+                        w = choice(self.allWords)
+                    else:
+                        w = i
+                    if self.case == 1:   w = w.lower()
+                    elif self.case == 2: w = w.title()
+                    elif self.case == 3: w = w.upper()
+                    if checker.checkWord(w, self.outputWords):
+                        self.outputWords.append(w)  
+            # output
+            if len(self.outputWords) < 1:
+                Message("word-o-mat: no matching words found <sad trombone>")
+            else:
+                outputString = " ".join(self.outputWords)
+                try:
+                    sp = OpenSpaceCenter(CurrentFont())
+                    sp.setRaw(outputString)
+                except:
+                    if warned == False:
+                        Message("No open fonts found; word-o-mat will output to the Output Window.")
+                    warned = True
+                    print "word-o-mat:", outputString
         else:
-            outputString = " ".join(self.outputWords)
-            try:
-                sp = OpenSpaceCenter(CurrentFont())
-                sp.setRaw(outputString)
-            except:
-                print "word-o-mat:", outputString
-                pass
+            print "word-o-mat: Aborted because of errors"
     
     def fontOpened(self, info):
         self.w.optionsBox.checkbox0.enable(True)
+        self.w.optionsBox.checkbox0.set(True)
          
     def fontClosed(self, info):
         if len(AllFonts()) <= 1:
@@ -197,5 +300,5 @@ class WordomatWindow:
     def windowClose(self, sender):
         removeObserver(self, "fontDidOpen")
         removeObserver(self, "fontWillClose")
-                
-w = WordomatWindow()
+
+OpenWindow(WordomatWindow)
