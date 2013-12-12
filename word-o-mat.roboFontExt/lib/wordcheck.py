@@ -5,6 +5,7 @@ class wordChecker(object):
         self.requiredLetters = requiredLetters
         self.requiredGroups = requiredGroups
         self.bannedLetters = bannedLetters
+        self.bannedLetters.append(" ") # spaces are banned inside words - this should bypass the UI, therefore done here 
         self.banRepetitions = banRepetitions
         self.minLength = minLength
         self.maxLength = maxLength

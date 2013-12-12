@@ -6,7 +6,7 @@
 import codecs
 import re
 from mojo.events import addObserver, removeObserver
-from mojo.extensions import ExtensionBundle
+from mojo.extensions import ExtensionBundle, getExtensionDefault, setExtensionDefault
 from mojo.roboFont import OpenWindow
 from mojo.UI import OpenSpaceCenter
 from random import choice
@@ -19,16 +19,19 @@ warned = False
 
 class WordomatWindow:
     def __init__(self):
-        self.wordCount = 20
-        self.minLength = 3
-        self.maxLength = 15
-        self.case = 0
-        self.requiredLetters = []
-        self.bannedLetters = []
+        self.wordCount = getExtensionDefault("com.ninastoessinger.word-o-mat.wordCount", 20)
+        self.minLength = getExtensionDefault("com.ninastoessinger.word-o-mat.minLength", 3)
+        self.maxLength = getExtensionDefault("com.ninastoessinger.word-o-mat.maxLength", 15)
+        self.case = getExtensionDefault("com.ninastoessinger.word-o-mat.case", 0)
+        self.requiredLetters = getExtensionDefault("com.ninastoessinger.word-o-mat.requiredLetters", "")
+        self.bannedLetters = getExtensionDefault("com.ninastoessinger.word-o-mat.bannedLetters", "")
         self.requiredGroups = [[], [], []]
-        self.limitToCharset = True if CurrentFont() else False
-        self.banRepetitions = False
-        self.randomize = True
+        for i in range(len(self.requiredGroups)):
+            self.requiredGroups[i] = getExtensionDefault("com.ninastoessinger.word-o-mat.requiredGroup"+str(i), "")
+        self.limitToCharset = self.readExtDefaultBoolean(getExtensionDefault("com.ninastoessinger.word-o-mat.limitToCharset", "True")) if CurrentFont() else False
+        self.banRepetitions = self.readExtDefaultBoolean(getExtensionDefault("com.ninastoessinger.word-o-mat.banRepetitions", "False"))
+        self.randomize = self.readExtDefaultBoolean(getExtensionDefault("com.ninastoessinger.word-o-mat.randomize", "True"))
+        
         self.allWords = []
         self.outputWords = []
         
@@ -79,6 +82,7 @@ class WordomatWindow:
         self.w.basicsBox.maxLength = EditText((165, 3 + interval * 1.25, 40, 22), text=self.maxLength, placeholder=str(10))  
         self.w.basicsBox.caseLabel = TextBox((bPadd, 3 + interval * 2.55, 60, 22), 'Case:') 
         self.w.basicsBox.case = PopUpButton((65, 2 + interval * 2.55, -10, 20), ["leave as is", "all lowercase", "Capitalize", "ALL CAPS"])
+        self.w.basicsBox.case.set(self.case)
         self.w.basicsBox.sourceLabel = TextBox((bPadd, 6 + interval * 3.55, 60, 22), 'Source:', sizeStyle="mini") 
         self.w.basicsBox.source = PopUpButton((65, 2 + interval * 3.55, -10, 20), ["Included word list (bigger)", "User Dictionary (faster)", "Custom..."], sizeStyle="mini", callback=self.changeSourceCallback)
         y += interval*5.2
@@ -99,11 +103,16 @@ class WordomatWindow:
             j = i+1
             y2 += interval
             optionsList = ["%s: %s" % (key, ", ".join(value)) for key, value in groupPresets]
-            if len(self.requiredGroups[i]) > 0:
-                optionsList.insert(0, "Current: " + ", ".join(self.requiredGroups[i]))
+            if len(self.requiredGroups[i]) > 0 and self.requiredGroups[i][0] != "":
+                optionsList.insert(0, "Recent: " + ", ".join(self.requiredGroups[i]))
             attrName = attrNameTemplate % j
             setattr(self.w.reqBox, attrName, ComboBox((bPadd+2, y2-4, -bPadd, 19), optionsList, sizeStyle="small")) 
         y += interval*9
+        
+        groupBoxes = [self.w.reqBox.group1box, self.w.reqBox.group2box, self.w.reqBox.group3box]
+        for i in range(3):
+            if len(self.requiredGroups[i]) > 0 and self.requiredGroups[i][0] != "":
+                groupBoxes[i].set(", ".join(self.requiredGroups[i]))
           
         self.w.optionsBox = Box((padd, y, -padd, interval*3.125))
         chkNameTemplate = "checkbox%s"
@@ -119,18 +128,34 @@ class WordomatWindow:
         self.w.bind("close", self.windowClose)
         self.w.open()
         
+    def readExtDefaultBoolean(self, string): 
+        if string == "True": 
+            return True
+        return False
+        
+    def writeExtDefaultBoolean(self, var): 
+        if var == True: 
+            return "True"
+        return "False"
+        
     def changeSourceCallback(self, sender):
         if sender.get() == 2: # Custom word list - this is very much in beta
-            filePath = getFile(title="Load custom word list", messageText="Select a text file with words on separate lines", fileTypes=["txt"])[0]
             try:
-                fo = codecs.open(filePath, mode="r", encoding="utf-8")
-                lines = fo.read()
-            except UnicodeDecodeError:
-                fo = open(filePath, 'r')
-                lines = fo.read()
-            fo.close()
-            self.customWords = lines.splitlines()
-            #self.customWords = [line.decode('utf-8') for line in lines.splitlines()] # this throws errors
+                filePath = getFile(title="Load custom word list", messageText="Select a text file with words on separate lines", fileTypes=["txt"])[0]
+            except TypeError:
+                filePath = None
+                self.customWords = []
+                print "word-o-mat: Input of custom word list canceled, using default"
+            if filePath is not None:
+                try:
+                    fo = codecs.open(filePath, mode="r", encoding="utf-8")
+                    lines = fo.read()
+                except UnicodeDecodeError:
+                    fo = open(filePath, 'r')
+                    lines = fo.read()
+                fo.close()
+                self.customWords = lines.splitlines()
+                #self.customWords = [line.decode('utf-8') for line in lines.splitlines()] # this throws errors                
     
     def fontCharacters(self, font):
         if not font:
@@ -238,7 +263,6 @@ class WordomatWindow:
         self.requiredGroups[1] = self.getInputString(self.w.reqBox.group2box, True) 
         self.requiredGroups[2] = self.getInputString(self.w.reqBox.group3box, True) 
         self.bannedLetters = self.getInputString(self.w.reqBox.notLettersBox, False)
-        self.bannedLetters.append(" ")
         self.limitToCharset = self.w.optionsBox.checkbox0.get()
         self.banRepetitions = self.w.optionsBox.checkbox1.get()
         self.randomize = self.w.optionsBox.checkbox2.get()
@@ -250,12 +274,31 @@ class WordomatWindow:
         elif self.source == 1:
             self.allWords = self.userWords
         elif self.source == 2:
-            if self.customWords:
+            if self.customWords and self.customWords != []:
                 self.allWords = self.customWords
             else:
                 self.allWords = self.ukacdWords 
                 self.w.basicsBox.source.set(0)
-        
+                
+        # store new values as defaults
+        extDefaults = {
+            "wordCount": self.wordCount, 
+            "minLength": self.minLength, 
+            "maxLength": self.maxLength, 
+            "case": self.case, 
+            "requiredLetters": self.requiredLetters,
+            "requiredGroup0": self.requiredGroups[0],
+            "requiredGroup1": self.requiredGroups[1],
+            "requiredGroup2": self.requiredGroups[2],
+            "bannedLetters": self.bannedLetters,
+            "limitToCharset": self.writeExtDefaultBoolean(self.limitToCharset), 
+            "banRepetitions": self.writeExtDefaultBoolean(self.banRepetitions), 
+            "randomize": self.writeExtDefaultBoolean(self.randomize),
+            }
+        for key, value in extDefaults.iteritems():
+            setExtensionDefault("com.ninastoessinger.word-o-mat."+key, value)
+                
+        # go make words
         if self.checkInput(self.limitToCharset, self.fontChars, self.requiredLetters, self.bannedLetters, self.minLength, self.maxLength, self.case) == True:
         
             checker = wordChecker(self.limitToCharset, self.fontChars, self.requiredLetters, self.requiredGroups, self.bannedLetters, self.banRepetitions, self.minLength, self.maxLength)
