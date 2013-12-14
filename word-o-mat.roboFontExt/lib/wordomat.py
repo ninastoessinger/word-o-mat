@@ -6,7 +6,7 @@
 import codecs
 import re
 from mojo.events import addObserver, removeObserver
-from mojo.extensions import ExtensionBundle, getExtensionDefault, setExtensionDefault
+from mojo.extensions import ExtensionBundle, getExtensionDefault, setExtensionDefault, registerExtensionDefaults
 from mojo.roboFont import OpenWindow
 from mojo.UI import OpenSpaceCenter
 from random import choice
@@ -19,6 +19,8 @@ warned = False
 
 class WordomatWindow:
     def __init__(self):
+        myDefaults = {"setting" : 10}
+        registerExtensionDefaults(myDefaults)
         self.wordCount = getExtensionDefault("com.ninastoessinger.word-o-mat.wordCount", 20)
         self.minLength = getExtensionDefault("com.ninastoessinger.word-o-mat.minLength", 3)
         self.maxLength = getExtensionDefault("com.ninastoessinger.word-o-mat.maxLength", 15)
