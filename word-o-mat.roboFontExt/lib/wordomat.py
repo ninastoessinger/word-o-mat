@@ -170,9 +170,16 @@ class WordomatWindow:
                     fo = open(filePath, 'r')
                     lines = fo.read()
                 fo.close()
-                self.customWords = lines.splitlines()
-                #self.customWords = [line.decode('utf-8') for line in lines.splitlines()] # this throws errors                
-    
+                self.customWords = [line.decode('utf-8') for line in lines.splitlines()] # this throws errors, why?
+                # this below variation silences the errors but skips words with special characters
+                # maybe I need to explicitly work with unicodes instead of strings 
+                # but not now
+                #try:
+                #    self.customWords = [line.decode('utf-8') for line in lines.splitlines()] # this throws errors      
+                #except:          
+                #    self.customWords = lines.splitlines()
+                ### END UNICODE BAUSTELLE
+                    
     def fontCharacters(self, font):
         if not font:
             return []
@@ -189,11 +196,13 @@ class WordomatWindow:
             if i != -1:
                 inputString = inputString[i+1:]
         result = pattern.split(inputString)
-        try:
-            result = [str(s) for s in result if s]
-        except UnicodeEncodeError:
-            Message ("Sorry! Characters beyond a-z/A-Z are not currently supported. Please adjust your input.")
-            result = []
+        #result = [str(s) for s in result if s]
+        result = [unicode(s) for s in result if s]
+        #try:
+        #    result = [str(s) for s in result if s]
+        #except UnicodeEncodeError:
+        #    Message ("Sorry! Characters beyond a-z/A-Z are not currently supported. Please adjust your input.")
+        #    result = []
         return result
         
     def getIntegerValue(self, field):
@@ -228,27 +237,27 @@ class WordomatWindow:
         return True
         
     def checkReqVsCase(self, required, case):
-        if case == 1: # all lowercase
-            lc = re.compile("[a-z]")
-            for c in required:
-                m = lc.match(c)
-                if not m:
-                    Message ("Conflict: You appear to want all-lowercase words, but have specified non-lowercase characters as required. Please revise.")
-                    return False
-            return True
-        elif case == 3: # all caps
-            uc = re.compile("[A-Z]")
-            for c in required:
-                m = uc.match(c)
-                if not m:
-                    Message ("Conflict: You appear to want words in all-caps, but have specified lowercase characters as required. Please revise.")
-                    return False
-            return True
-        else:
+        #if case == 1: # all lowercase
+        #    lc = re.compile("[a-z]")
+        #    for c in required:
+        #        m = lc.match(c)
+        #        if not m:
+        #            Message ("Conflict: You appear to want all-lowercase words, but have specified non-lowercase characters as required. Please revise.")
+        #            return False
+        #    return True
+        #elif case == 3: # all caps
+        #    uc = re.compile("[A-Z]")
+        #    for c in required:
+        #        m = uc.match(c)
+        #        if not m:
+        #            Message ("Conflict: You appear to want words in all-caps, but have specified lowercase characters as required. Please revise.")
+        #            return False
+        #    return True
+        #else:
             return True
         
     def checkMinVsMax(self, minLength, maxLength):
-        if not minLength < maxLength:
+        if not minLength <= maxLength:
             Message ("Confusing input for minimal/maximal word length. Please fix.")
             return False
         return True
