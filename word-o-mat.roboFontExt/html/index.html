@@ -10,53 +10,52 @@
 </head>
 
 <body>
-<h1>word-o-mat v1.2</h1>
+<h1>word-o-mat v2.0</h1>
 
-<p>(Dec 10, 2013)</p>
-<p>word-o-mat is an extension for RoboFont that generates words for use in type sketching, spacing, testing etc. This is my first RF extension, supplied without any promises and all that jazz. If you find any bugs or have suggestions for future development, please either fix them or <a href="mailto:altairas_eye@mac.com">send me a line</a>, thx :)</p>
+<p>(Apr 30, 2014)</p>
+<p>word-o-mat is an extension for RoboFont that generates words for use in type sketching, spacing, testing etc., displaying them directly in the Space Center. 
+<br>If you find any bugs or have suggestions for future development, please either fix them or <a href="mailto:altairas_eye@mac.com">send me a line</a>. Help is especially also welcome for making the word lists better; I've gone through the German one manually, but the other non-English ones probably still have quite a few errors. Sorry / please help make them better.<br>
+The code is published under an MIT license; please also see the licensing terms of the enclosed word lists.</p>
 
 <h2>Interface Elements</h2> 
 
 <p><strong>Word Count</strong></p>
-<p>The first row lets you specify the amount of words that should be generated. (If you&rsquo;re using these in the Space Center, it&rsquo;s better not to use extremely large numbers of words.)</p>
+<p>Specify the number of words that should be generated. (Be advised that using large numbers significantly slows down performance of the Space Center.)</p>
 
 <p><strong>Word Length</strong></p>
-<p>Adjust minimal and maximal length of created words. Both these numbers are inclusive (i.e. specifying 3 and 5 will yield three, four and five letter words).<br />
+<p>Set minimal and maximal length of created words. Both these numbers are inclusive: Specifying 3 and 5 will yield three, four and five letter words.<br />
+</p>
+
+<p><strong>Language/Source</strong></p>
+<p>Select language / source word list to use. By default, word-o-mat uses a freely available and quite large English crossword solvers&rsquo; word list called the UKACD (<a href="http://www.crosswordman.com/wordlist.html">UK Advanced Cryptics Dictionary</a>). Word-o-mat now also includes 11 shorter word lists for Czech, Danish, Dutch, Finnish, French, German, Hungarian, Norwegian, Slovak, Spanish and Swedish, all of which can be handily selected here. More languages will be added in later versions. These lists are derived from the freely redistributable word lists compiled from movie subtitles by <a href="http://invokeit.wordpress.com/frequency-word-lists/">Hermit Dave of Invoke IT</a>.<br>
+In addition to the language-specific selection there are two extra options: Using your Mac&rsquo;s internal words dictionary, or a custom word list. This needs to be a .txt file with words on separate lines, using UTF-8 encoding. The script will disregard any lines that contain spaces.<br />
 </p>
 
 <p><strong>Case</strong></p>
 <p>Select whether you want to look at words as they are provided, or converted to all lowercase, all uppercase, or with their first letter capitalized.<br />
 </p>
 
-<p><strong>Source</strong></p>
-<p>Select where the words come from. By default, word-o-mat uses a text file included with the extension, a freely available and quite large crossword solvers&rsquo; word list called the UKACD (<a href="http://www.crosswordman.com/wordlist.html">UK Advanced Cryptics Dictionary</a>). You can also use your Mac&rsquo;s internal dictionary, which is not as big but faster. As a third option, you can specify an own word list to use. This has to be a .txt file with the words on separate lines, and the script will disregard any lines that include spaces, since it looks strictly for words. (This is very new and sort of in beta; please let me know if you run into problems. Also, please don&rsquo;t blame me if any of the lists contain inappropriate words.)<br />
-</p>
+<p><strong>Character set selection</strong></p>
+<p>Select which set of characters to use for making words:<br>
+- Use any characters; if they do not exist in the current font they will simply not be displayed in the Space Center.<br>
+- Limit to characters in current font: This will make words using only characters that are available in the current font; this uses the Unicode information, so make sure you have your codepoints assigned properly.<br>
+- Limit to selected glyphs: If you want to proof/test a subset of your existing glyphs, just select the glyphs to use in the Font Collection window and select this option.<br>
+For obvious reasons, this selection is only active if you have a font open.</p>
 
-<p><strong>Obligatory characters</strong></p>
-<p>Enter characters that must be contained in all returned words (a&ndash;z, A&ndash;Z; comma- or space-delimited list).</p>
+<p><strong>Required characters</strong></p>
+<p>Enter characters that must be contained in all returned words (comma- or space-delimited list). You can use accented characters here; please just enter the characters themselves (not their names).</p>
 
 <p><strong>Groups</strong></p>
-<p>You can define up to three groups or sets of characters, and word-o-mat will look for words that contain at least one character from each of the specified groups. You can choose from presets (letters with ascenders, descenders, arches, diagonals, and ball-and-stick letters) or just type in your own (a&ndash;z, A&ndash;Z; comma- or space-delimited list).</p>
-
-<p><strong>Banned characters</strong></p>
-<p>Enter characters that must not be contained in the returned words (a&ndash;z, A&ndash;Z; comma- or space-delimited list).</p>
-
-<p><strong>Limit to characters available in current font</strong></p>
-<p>If you want to use word-o-mat for testing your existing font, you may want to tick this box to make word-o-mat exclude any words using letters you don&rsquo;t have (yet). (Obviously, this option is only available if you have a font open.) Deselect this option to generate words using the entire character set, for instance for sketching.</p>
+<p>You can define up to three groups or sets of characters, and word-o-mat will look for words that contain at least one character from each of the specified groups. You can choose from presets (letters with ascenders, descenders, arches, diagonals, and ball-and-stick letters) or just type in your own (comma- or space-delimited list). Make sure not to select groups that contradict other options (don't select lowercase groups if you want all caps).<br>
+You can use accented characters in these fields; please enter the characters themselves (not their names).</p>
 
 <p><strong>No repeating characters</strong></p>
-<p>Excludes words in which one or more characters occur more than once. Might be useful when generating words for sketching, etc.</p>
+<p>Excludes words in which one or more characters occur more than once. Can be useful when generating words for sketching.</p>
 
-<p><strong>Randomize output</strong></p>
-<p>Gives a random list of words every time the script is run. If this is unchecked, word-o-mat will simply return the first words it finds in the word list (see below).</p>
+<p><strong>Words please!</strong></p>
+<p>Submit button. Makes words.</p>
 
-<h2>MEQ (Most Expected Questions)</h2>
-
-<p><strong>Can I use word-o-mat for other languages?</strong></p>
-<p>There are two things to consider. One is the word list that word-o-mat uses to find words. This can be replaced, see above, so you are free to use a list using words in a language other than English. The other consideration however is that word-o-mat does not yet support specifying characters outside the basic a&ndash;z/A&ndash;Z range as search criteria. This may be fixed in future versions if there is interest.</p>
-
-<p><strong>word-o-mat makes my RoboFont reeeeally slow.</strong></p>
-<p>Are you outputting hundreds of words into your Space Center? Maybe try a few less.</p>
+<p>--<br>Nina St&ouml;ssinger 2013&ndash;2014 / <a href="mailto:post@ninastoessinger.com">post@ninastoessinger.com</a></p>
 
 </body>
 </html>

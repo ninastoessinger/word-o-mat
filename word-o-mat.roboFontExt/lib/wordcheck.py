@@ -1,11 +1,13 @@
+import codecs
+
 class wordChecker(object):
-    def __init__(self, limitToCharset, fontChars, requiredLetters, requiredGroups, bannedLetters, banRepetitions, minLength, maxLength):
+    def __init__(self, limitToCharset, fontChars, customCharset, requiredLetters, requiredGroups, banRepetitions, minLength, maxLength):
         self.limitToCharset = limitToCharset
         self.fontChars = fontChars
+        self.customCharset = customCharset
         self.requiredLetters = requiredLetters
         self.requiredGroups = requiredGroups
-        self.bannedLetters = bannedLetters
-        self.bannedLetters.append(" ") # spaces are banned inside words - this should bypass the UI, therefore done here 
+        self.bannedLetters = [" "] # spaces are banned inside words
         self.banRepetitions = banRepetitions
         self.minLength = minLength
         self.maxLength = maxLength
@@ -17,8 +19,9 @@ class wordChecker(object):
         return True
 
     def includedAll(self, word, charList):
+        #word = unicode(word)
         for c in charList:
-            if not c in word:
+            if not c in word: # this throws a UnicodeDecodeError when c is non-ASCII
                 return False
         return True
 
@@ -37,10 +40,14 @@ class wordChecker(object):
                 return False
         return True
 
-    def limitedTo(self, word, charList, condition):
+    def limitedTo(self, word, charList, selectedCharList, condition):
+        if len(selectedCharList) > 0:
+            useList = selectedCharList
+        else:
+            useList = charList
         if condition:
             for c in word:
-                if not c in charList:
+                if not c in useList:
                     return False
             return True
         else:
@@ -66,7 +73,7 @@ class wordChecker(object):
     def checkWord(self, word, outputWords):
         requirements = [
             (self.checkExisting, [outputWords]),    
-            (self.limitedTo, [self.fontChars, self.limitToCharset]),
+            (self.limitedTo, [self.fontChars, self.customCharset, self.limitToCharset]),
             (self.checkLength, []),
             (self.includedAll, [self.requiredLetters]),
             (self.includedGroups, [self.requiredGroups]),
