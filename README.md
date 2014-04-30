@@ -23,9 +23,9 @@ Reworked Interface
 
 - More compact interface, advanced options hidden by default. Easy switching between languages. 
 
-– The “banned letters” field is gone; in its place I have added an option to use only glyphs that have been selected in the font window. This should be a nicer way to handle proofing a subset of the available glyphs.
+- The “banned letters” field is gone; in its place I have added an option to use only glyphs that have been selected in the font window. This should be a nicer way to handle proofing a subset of the available glyphs.
 
-– The “randomize output” option has been removed; random output is on by default.
+- The “randomize output” option has been removed; random output is on by default.
 
 - Different handling of preferences: Required glyphs and groups (hidden pane) will reset to default/empty on startup. Basic options (word count, length, case and language, character set) are (still) saved in the prefs.
 
