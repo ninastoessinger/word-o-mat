@@ -7,8 +7,7 @@ Looking for words that contain "q" but not "u"? Or words that use an "a", a "g",
 
 New in version 2.0:
 
-Extended Language Support
-*************************
+EXTENDED LANGUAGE SUPPORT
 
 - word-o-mat now supports accented characters (should be UTF-8 compliant), so you can also use it for languages other than English (I’ve only tested it for Latin-based languages for now). It uses the Unicode info of the glyphs for this, so make sure you have your codepoints assigned properly.
 
@@ -18,8 +17,7 @@ You can also still use custom wordlists. (For best results use UTF-8 encoding.)
 Extended language support is very fresh. I hope to have more comprehensive and less error-prone lists in the future, and expand the list of included languages; your help is welcome and needed. Please report any bugs, as well as words that should be corrected or dropped.
 
 
-Reworked interface
-******************
+REWORKED INTERFACE
 
 - More compact interface, advanced options hidden by default. Easy switching between languages. 
 
