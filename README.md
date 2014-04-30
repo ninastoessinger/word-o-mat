@@ -7,7 +7,8 @@ Looking for words that contain "q" but not "u"? Or words that use an "a", a "g",
 
 New in version 2.0:
 
-EXTENDED LANGUAGE SUPPORT
+Extended Language Support
+=======
 
 - word-o-mat now supports accented characters (should be UTF-8 compliant), so you can also use it for languages other than English (I’ve only tested it for Latin-based languages for now). It uses the Unicode info of the glyphs for this, so make sure you have your codepoints assigned properly.
 
@@ -17,7 +18,8 @@ You can also still use custom wordlists. (For best results use UTF-8 encoding.)
 Extended language support is very fresh. I hope to have more comprehensive and less error-prone lists in the future, and expand the list of included languages; your help is welcome and needed. Please report any bugs, as well as words that should be corrected or dropped.
 
 
-REWORKED INTERFACE
+Reworked Interface
+=======
 
 - More compact interface, advanced options hidden by default. Easy switching between languages. 
 
@@ -28,8 +30,6 @@ REWORKED INTERFACE
 - Different handling of preferences: Required glyphs and groups (hidden pane) will reset to default/empty on startup. Basic options (word count, length, case and language, character set) are (still) saved in the prefs.
 
 - The window is not “always on top” anymore.
-=======
-This is my first RF extension, supplied without any promises and all that jazz (formally, I’m putting an MIT license on my code; please note the licensing terms of the included word lists, too). Please also note that I assume no responsibility for inappropriate words rendered by this extension.
-If you find any bugs or have suggestions for future development, please get in touch, or fix them yourself :)
->>>>>>> FETCH_HEAD
 
+
+If you find any bugs or have suggestions for future development, please get in touch, or fix them yourself :)
