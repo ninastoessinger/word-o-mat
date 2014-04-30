@@ -5,8 +5,7 @@ Looking for words that contain "q" but not "u"? Or words that use an "a", a "g",
 
 ![word-o-mat screenshot](/screenshot.png)
 
-<<<<<<< HEAD
-New in 2.0:
+New in version 2.0:
 
 Extended Language Support
 *************************
