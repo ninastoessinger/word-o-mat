@@ -5,6 +5,7 @@ Looking for words that contain "q" but not "u"? Or words that use an "a", a "g",
 
 ![word-o-mat screenshot](/screenshot.png)
 
+<<<<<<< HEAD
 New in 2.0:
 
 Extended Language Support
@@ -30,4 +31,8 @@ Reworked interface
 - Different handling of preferences: Required glyphs and groups (hidden pane) will reset to default/empty on startup. Basic options (word count, length, case and language, character set) are (still) saved in the prefs.
 
 - The window is not “always on top” anymore.
+=======
+This is my first RF extension, supplied without any promises and all that jazz (formally, I’m putting an MIT license on my code; please note the licensing terms of the included word lists, too). Please also note that I assume no responsibility for inappropriate words rendered by this extension.
+If you find any bugs or have suggestions for future development, please get in touch, or fix them yourself :)
+>>>>>>> FETCH_HEAD
 
