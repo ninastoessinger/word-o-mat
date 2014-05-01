@@ -65,7 +65,7 @@ class WordomatWindow:
         addObserver(self, "fontClosed", "fontWillClose")
         
         # dialog window
-        self.w = Window((241, 259), 'word-o-mat', minSize=(290,75), maxSize=(290,510))
+        self.w = Window((241, 259), 'word-o-mat', minSize=(241,112), maxSize=(241,459))
         interval = 25
         padd = 17
         bPadd = 3
