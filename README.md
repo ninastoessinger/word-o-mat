@@ -12,10 +12,16 @@ Extended Language Support
 
 - word-o-mat now supports accented characters (should be UTF-8 compliant), so you can also use it for languages other than English (I’ve only tested it for Latin-based languages for now). It uses the Unicode info of the glyphs for this, so make sure you have your codepoints assigned properly.
 
-- Now ships with built-in word lists for: English, Czech, Danish, Dutch, Finnish, French, German, Hungarian, Italian, Norwegian, Slovak, and Spanish. Word lists contain approximately 20.000 words each and are derived from lists compiled by Hermit Dave from public/free movie subtitle sources, used with permission and licensed under Creative Commons – Attribution / ShareAlike 3.0. 
-You can also still use custom wordlists. (For best results use UTF-8 encoding.)
+- Now ships with built-in word lists for: *English*, Czech, Danish, Dutch, Finnish, *French*, *German*, Hungarian, Italian, *Norwegian*, Slovak, and Spanish. Word lists contain approximately 20.000 words each and are derived from lists compiled by Hermit Dave from public/free movie subtitle sources, used with permission and licensed under Creative Commons – Attribution / ShareAlike 3.0. 
 
-Extended language support is very fresh. I hope to have more comprehensive and less error-prone lists in the future, and expand the list of included languages; your help is welcome and needed. Please report any bugs, as well as words that should be corrected or dropped.
+Some of the language word lists have been manually checked and corrected:
+- German (Nina Stössinger)
+- Norwegian (Sindre Bremnes of Monokrom) – https://monokrom.no/
+- French (La Police Type Foundry with David Hodgetts) – https://github.com/LaPolice
+
+Others (notably Danish) are in progress. Please help cleaning up the other ones if you can, and use with caution.
+
+You can also still use custom wordlists. (For best results use UTF-8 encoding.)
 
 
 Reworked Interface
