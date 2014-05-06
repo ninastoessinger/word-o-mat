@@ -199,11 +199,14 @@ class WordomatWindow:
     def fontCharacters(self, font):
         if not font:
             return []
-        charset = []
+        charset = []    
         for g in font:
             # charset.append(g.name)
             if g.unicode is not None:
-                charset.append(unichr(int(g.unicode)))
+                try:
+                    charset.append(unichr(int(g.unicode)))
+                except ValueError:
+                    pass
         return charset
         
     def getInputString(self, field, stripColon):
@@ -311,7 +314,10 @@ class WordomatWindow:
                         self.customCharset = []
                         for gname in self.f.selection:
                             if self.f[gname].unicode is not None: # make sure this does what it should
-                                self.customCharset.append(unichr(int(self.f[gname].unicode))) 
+                                try: 
+                                    self.customCharset.append(unichr(int(self.f[gname].unicode)))
+                                except ValueError:
+                                    pass 
                         for entry in self.customCharset:
                             print entry
                     except AttributeError: 
