@@ -140,6 +140,7 @@ class WordomatWindow:
         self.w.accView = AccordionView((0, 0, 290, -0), accItems)
         
         self.w.bind("close", self.windowClose)
+        self.w.setDefaultButton(self.optionsBox.submit)
         self.w.open()
         
     def readExtDefaultBoolean(self, string): 
