@@ -8,7 +8,7 @@ Looking for words that contain "q" but not "u"? Or words that use an "a", a "g",
 
 New in version 2.1:
 
-- Input fields for required characters now accept glyph names as well as character values (so both inputting "ö" or "odieresis" will work).
+- Input fields for required characters now accept glyph names as well as character values (so either inputting "ö" or "odieresis" will work - you can even mix them).
 
 - Option to output words on separate lines, sorted by length (may be useful for building specimens). This includes kerning, which assumes MetricsMachine-style kern class names (to override this with your own left/right class markers, edit the "markers" list in wordomat.py, line 333).
 
