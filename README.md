@@ -1,9 +1,19 @@
-word-o-mat v2.0
+word-o-mat v2.1
 ==========
 
 Looking for words that contain "q" but not "u"? Or words that use an "a", a "g", at least one ascender, and one diagonal, but not the ones you haven't drawn yet? This is the sort of thing that word-o-mat can help you with. It's an extension for RoboFont that generates words for use in type sketching, spacing, testing etc.
 
 ![word-o-mat screenshot](/screenshot.png)
+
+
+New in version 2.1:
+
+- Input fields for required characters now accept glyph names as well as character values (so both inputting "ö" or "odieresis" will work).
+
+- Option to output words on separate lines, sorted by length (may be useful for building specimens). This includes kerning, which assumes MetricsMachine-style kern class names (to override this with your own left/right class markers, edit the "markers" list in wordomat.py, line 333).
+
+- Addition of Catalan wordlist, compiled by Joancarles Casasín. Many thanks!
+
 
 New in version 2.0:
 

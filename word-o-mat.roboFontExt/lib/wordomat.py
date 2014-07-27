@@ -2,10 +2,10 @@
 #
 # Tool for RoboFont to generate test words for type testing, sketching etc.
 # Default wordlist ukacd.txt is from http://www.crosswordman.com/wordlist.html
-# Other languages based on Hermit Dave’s wordlists at http://invokeit.wordpress.com/frequency-word-lists/
+# Other languages see attributions inside the respective textfiles
 # I assume no responsibility for inappropriate words found on those lists and rendered by this script :)
 #
-# v2.0 / Nina Stössinger / 30.04.2014 / KABK t]m 1314 / with thanks to Just van Rossum
+# v2.1 / Nina Stössinger / 27.07.2014 / with thanks to Just van Rossum
 
 
 import codecs
@@ -47,8 +47,8 @@ class WordomatWindow:
         self.dictWords = {}
         self.allWords = []
         self.outputWords = []
-        self.textfiles = ['ukacd', 'czech', 'danish', 'dutch', 'finnish', 'french', 'german', 'hungarian', 'italian', 'norwegian', 'slovak', 'spanish']
-        self.languageNames = ['English', 'Czech', 'Danish', 'Dutch', 'Finnish', 'French', 'German', 'Hungarian', 'Italian', 'Norwegian', 'Slovak', 'Spanish']
+        self.textfiles = ['ukacd', 'catalan', 'czech', 'danish', 'dutch', 'finnish', 'french', 'german', 'hungarian', 'italian', 'norwegian', 'slovak', 'spanish']
+        self.languageNames = ['English', 'Catalan', 'Czech', 'Danish', 'Dutch', 'Finnish', 'French', 'German', 'Hungarian', 'Italian', 'Norwegian', 'Slovak', 'Spanish']
         self.source = getExtensionDefault("com.ninastoessinger.word-o-mat.source", 0)
         
         self.loadDictionaries()
@@ -65,7 +65,7 @@ class WordomatWindow:
         addObserver(self, "fontClosed", "fontWillClose")
         
         # dialog window
-        self.w = Window((241, 259), 'word-o-mat', minSize=(241,112), maxSize=(241,459))
+        self.w = Window((241, 259), 'word-o-mat', minSize=(241,112), maxSize=(241,479))
         interval = 25
         padd = 17
         bPadd = 3
@@ -103,7 +103,7 @@ class WordomatWindow:
             else:
                 self.basicsBox.radioGroup.set(1) # Use current font
 
-        self.reqBox = Group((padd, 5, 270, 200))
+        self.reqBox = Group((padd, 5, 270, 220))
         labelY = [8, 54]
         labelText = ["Require these letters in each word:", "Require one per group for each word:"]
         for i in range(2):
@@ -128,13 +128,16 @@ class WordomatWindow:
                 
         self.reqBox.checkbox0 = CheckBox((bPadd, 140, 18, 18), "", sizeStyle="small", value=self.banRepetitions)
         self.reqBox.checkLabel = TextBox((18, 145, -bPadd, 18), "No repeating characters in words", sizeStyle="small")
+
+        self.reqBox.listOutput = CheckBox((bPadd, 160, 18, 18), "", sizeStyle="small")
+        self.reqBox.listLabel = TextBox((18, 165, -bPadd, 18), "Output as list sorted by width", sizeStyle="small")
           
         self.optionsBox = Group((padd, 5, 270, interval*1.5))
         self.optionsBox.submit = Button((0, 1, 201, 22), 'words please!', callback=self.makeWords)
         
         accItems = [
                        dict(label="Main controls", view=self.basicsBox, size=169, collapsed=False, canResize=False),
-                       dict(label="Require specific letters", view=self.reqBox, size=177, collapsed=True, canResize=False),
+                       dict(label="Options", view=self.reqBox, size=197, collapsed=True, canResize=False),
                        dict(label="Go for it", view=self.optionsBox, size=37, collapsed=False, canResize=False)
                        ]     
         self.w.accView = AccordionView((0, 0, 290, -0), accItems)
@@ -200,15 +203,17 @@ class WordomatWindow:
     def fontCharacters(self, font):
         if not font:
             return []
-        charset = []    
+        charset = [] 
+        gnames = []   
         for g in font:
             # charset.append(g.name)
             if g.unicode is not None:
                 try:
                     charset.append(unichr(int(g.unicode)))
+                    gnames.append(g.name)
                 except ValueError:
                     pass
-        return charset
+        return charset, gnames
         
     def getInputString(self, field, stripColon):
         inputString = field.get()
@@ -217,8 +222,20 @@ class WordomatWindow:
             i = inputString.find(":")
             if i != -1:
                 inputString = inputString[i+1:]
-        result = pattern.split(inputString)
-        result = [unicode(s) for s in result if s]
+        result1 = pattern.split(inputString)
+        
+        result2 = []
+        for c in result1:
+        	if len(c)>1: # glyph names
+        		if self.f.has_key(c):
+    				g = self.f[c]
+    				value = unicode(unichr(int(g.unicode)))
+    				result2.append(value)
+        		else:
+        			Message ("Conflict: Character \"%s\" was specified as required, but not found. It will be skipped." % c)
+        	else: # character values
+        		result2.append(c)
+        result = [unicode(s) for s in result2 if s]
         return result
         
     def getIntegerValue(self, field):
@@ -269,7 +286,7 @@ class WordomatWindow:
         #            return False
         #    return True
         #else:
-            return True
+        return True
         
     def checkMinVsMax(self, minLength, maxLength):
         if not minLength <= maxLength:
@@ -288,12 +305,56 @@ class WordomatWindow:
             if not reqFunc(*args):
                 return False
         return True
+        
+    def sortWordsByWidth(self, wordlist):
+        f = CurrentFont()
+        wordWidths = []
+        
+        for word in wordlist:
+            unitCount = 0
+            for char in word:
+                try:
+                	glyphWidth = f[char].width
+                except:
+                	gname = self.glyphNamesForValues[char]
+                	glyphWidth = f[gname].width
+                unitCount += glyphWidth
+            # add kerning
+            for i in range(len(word)-1):
+            	pair = list(word[i:i+2])
+            	unitCount += int(self.findKerning(pair))
+            wordWidths.append(unitCount)
+        
+        wordWidths_sorted, wordlist_sorted = zip(*sorted(zip(wordWidths, wordlist))) # thanks, stackoverflow
+        return wordlist_sorted
+
+    def findKerning(self, chars):
+	    # this assumes Metrics Machine style group names, you can override with your convention here
+	    markers = ["@MMK_L_", "@MMK_R_"]
+	    keys = [c for c in chars]
+	    
+	    for i in range(2):
+	        allGroups = self.f.groups.findGlyph(chars[i])
+	        if len(allGroups) > 0:
+	            for g in allGroups:
+	                if markers[i] in g:
+	                    keys[i] = g
+	                    continue
+	                    
+	    key = (keys[0], keys[1])
+	    if self.f.kerning.has_key(key):
+	        return self.f.kerning[key]
+	    else:
+	        return 0
                 
     def makeWords(self, sender=None):
         
         global warned
         self.f = CurrentFont()
-        self.fontChars = self.fontCharacters(self.f)
+        self.fontChars, self.glyphNames = self.fontCharacters(self.f)
+
+        self.glyphNamesForValues = {self.fontChars[i]: self.glyphNames[i] for i in range(len(self.fontChars))}
+
         self.wordCount = self.getIntegerValue(self.basicsBox.wordCount)
         self.minLength = self.getIntegerValue(self.basicsBox.minLength)
         self.maxLength = self.getIntegerValue(self.basicsBox.maxLength)
@@ -311,7 +372,7 @@ class WordomatWindow:
                     self.basicsBox.radioGroup.set(1) # use font chars
                 else:
                     try:
-                        #self.customCharset = self.f.selection # this just gives me the font names
+                        #self.customCharset = self.f.selection # this just gives me the glyph names
                         self.customCharset = []
                         for gname in self.f.selection:
                             if self.f[gname].unicode is not None: # make sure this does what it should
@@ -319,8 +380,8 @@ class WordomatWindow:
                                     self.customCharset.append(unichr(int(self.f[gname].unicode)))
                                 except ValueError:
                                     pass 
-                        for entry in self.customCharset:
-                            print entry
+                        #for entry in self.customCharset:
+                        #    print entry
                     except AttributeError: 
                         pass        
                 
@@ -381,7 +442,12 @@ class WordomatWindow:
             if len(self.outputWords) < 1:
                 Message("word-o-mat: no matching words found <sad trombone>")
             else:
-                outputString = " ".join(self.outputWords)
+                joinString = " "
+                #if self.reqBox.delimiterRadio.get() == 1:
+                if self.reqBox.listOutput.get() == True:
+                    joinString = "\\n"
+                    self.outputWords = self.sortWordsByWidth(self.outputWords) ##### NEW / EXPERIMENTAL FEATURE
+                outputString = joinString.join(self.outputWords)
                 try:
                     sp = OpenSpaceCenter(CurrentFont())
                     sp.setRaw(outputString)
