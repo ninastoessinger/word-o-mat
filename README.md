@@ -10,7 +10,7 @@ New in version 2.1:
 
 - Input fields for required characters now accept glyph names as well as character values (so either inputting "ö" or "odieresis" will work - you can even mix them).
 
-- Option to output words on separate lines, sorted by length (may be useful for building specimens). This includes kerning, which assumes MetricsMachine-style kern class names (to override this with your own left/right class markers, edit the "markers" list in wordomat.py, line 333).
+- Option to output words on separate lines, sorted by their calculated set width (may be useful for building specimens). This includes kerning, which assumes MetricsMachine-style kern class names (to override this with your own left/right class markers, edit the "markers" list in wordomat.py, line 333).
 
 - Addition of Catalan wordlist, compiled by Joancarles Casasín. Many thanks!
 
