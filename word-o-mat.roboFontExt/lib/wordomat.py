@@ -380,8 +380,6 @@ class WordomatWindow:
                                     self.customCharset.append(unichr(int(self.f[gname].unicode)))
                                 except ValueError:
                                     pass 
-                        #for entry in self.customCharset:
-                        #    print entry
                     except AttributeError: 
                         pass        
                 
@@ -434,7 +432,13 @@ class WordomatWindow:
                 else:
                     w = choice(self.allWords)
                     if self.case == 1:   w = w.lower()
-                    elif self.case == 2: w = w.title()
+                    elif self.case == 2: 
+                        # special capitalization rules for Dutch IJ
+                        if self.languageNames[self.source] == "Dutch" and w[:2] == "ij":
+                                wNew = "IJ" + w[2:]
+                                w = wNew
+                        else:
+                            w = w.title()
                     elif self.case == 3: w = w.upper()
                     if checker.checkWord(w, self.outputWords):
                         self.outputWords.append(w)  
