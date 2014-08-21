@@ -434,10 +434,13 @@ class WordomatWindow:
                     if self.case == 1:   w = w.lower()
                     elif self.case == 2: 
                         # special capitalization rules for Dutch IJ
-                        if self.languageNames[self.source] == "Dutch" and w[:2] == "ij":
+                        try:
+                            if self.languageNames[self.source] == "Dutch" and w[:2] == "ij":
                                 wNew = "IJ" + w[2:]
                                 w = wNew
-                        else:
+                            else:
+                                w = w.title()
+                        except IndexError:
                             w = w.title()
                     elif self.case == 3: w = w.upper()
                     if checker.checkWord(w, self.outputWords):
