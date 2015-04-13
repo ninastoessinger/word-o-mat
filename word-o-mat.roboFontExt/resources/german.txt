@@ -5394,7 +5394,6 @@ gefunden
 gefährden
 gefährdet
 Gefährdung
-gefähriich
 gefährlich
 gefährliche
 gefährlichen
@@ -13781,7 +13780,6 @@ tatest
 Tatort
 Tatsache
 Tatsachen
-tatsächiich
 tatsächlich
 Tattoo
 Tau

@@ -10,12 +10,12 @@
 </head>
 
 <body>
-<h1>word-o-mat v2.0</h1>
+<h1>word-o-mat v2.2</h1>
 
-<p>(Apr 30, 2014)</p>
-<p>word-o-mat is an extension for RoboFont that generates words for use in type sketching, spacing, testing etc., displaying them directly in the Space Center. 
-<br>If you find any bugs or have suggestions for future development, please either fix them or <a href="mailto:altairas_eye@mac.com">send me a line</a>. Help is especially also welcome for making the word lists better; I've gone through the German one manually, but the other non-English ones probably still have quite a few errors. Sorry / please help make them better.<br>
-The code is published under an MIT license; please also see the licensing terms of the enclosed word lists.</p>
+<p>(Apr 13, 2015)</p>
+<p>word-o-mat is an extension for RoboFont that generates words for use in type sketching, spacing, testing etc., displaying them directly in the Space Center (or in the Output Window if no font is open).</p>
+<p>If you find any bugs or have suggestions for future development, please either fix them or <a href="mailto:nina@typologic.nl">send me a line</a>. Help is especially also welcome for the word lists; many of them come from open sources like movie subtitles, and contain errors and stray English words or proper names.</p>
+<p>The code is published under an MIT license; please also see the licensing terms of the enclosed word lists.</p>
 
 <h2>Interface Elements</h2> 
 
@@ -27,35 +27,26 @@ The code is published under an MIT license; please also see the licensing terms 
 </p>
 
 <p><strong>Language/Source</strong></p>
-<p>Select language / source word list to use. By default, word-o-mat uses a freely available and quite large English crossword solvers&rsquo; word list called the UKACD (<a href="http://www.crosswordman.com/wordlist.html">UK Advanced Cryptics Dictionary</a>). Word-o-mat now also includes 11 shorter word lists for Czech, Danish, Dutch, Finnish, French, German, Hungarian, Norwegian, Slovak, Spanish and Swedish, all of which can be handily selected here. More languages will be added in later versions. These lists are derived from the freely redistributable word lists compiled from movie subtitles by <a href="http://invokeit.wordpress.com/frequency-word-lists/">Hermit Dave of Invoke IT</a>.<br>
-In addition to the language-specific selection there are two extra options: Using your Mac&rsquo;s internal words dictionary, or a custom word list. This needs to be a .txt file with words on separate lines, using UTF-8 encoding. The script will disregard any lines that contain spaces.<br />
+<p>Out of the box, word-o-mat supports 17 languages: besides a quite large English crossword solvers&rsquo; word list it comes with shorter word lists for Catalan, Czech, Danish, Dutch, Finnish, French, German, Hungarian, Icelandic, Italian, Latin, Norwegian, Polish, Slovak, Spanish and Vietnamese syllables; more languages continue to be added. There is also an option to use the built-in OSX dictionary, and one to use words from any of the available languages (caution: this will slow down things, as word-o-mat will need to process a six-digit number of words).<br />You can also use a custom word list; this needs to be a .txt file with words on separate lines, using UTF-8 encoding. The script will disregard any lines that contain spaces.<br />
 </p>
 
 <p><strong>Case</strong></p>
-<p>Select whether you want to look at words as they are provided, or converted to all lowercase, all uppercase, or with their first letter capitalized.<br />
+<p>Select whether you want to look at words as they are provided, or converted to all lowercase, all uppercase, or with their first letter capitalized.<br />Please note that the words get processed <em>before</em> matching required letters: Thus if you&rsquo;re looking for all-cap words with the letter <em>A/a</em> in it, you need to specify <em>A</em> as required, not <em>a</em>.
 </p>
 
-<p><strong>Character set selection</strong></p>
-<p>Select which set of characters to use for making words:<br>
-- Use any characters; if they do not exist in the current font they will simply not be displayed in the Space Center.<br>
-- Limit to characters in current font: This will make words using only characters that are available in the current font; this uses the Unicode information, so make sure you have your codepoints assigned properly.<br>
-- Limit to selected glyphs: If you want to proof/test a subset of your existing glyphs, just select the glyphs to use in the Font Collection window and select this option.<br>
-For obvious reasons, this selection is only active if you have a font open.</p>
+<p><strong>Matching specific characters</strong></p>
+<p>There are two ways to specify what letters to match in a word, Text and GREP mode.</p>
+<p>In <strong>Text mode</strong> you can simply enter a list of characters that should occur in every word, as well as up to three groups (use space- or comma-delimited lists; both character values and glyph names are fine). The idea of groups is that at least one character per group is required in each word.</p>
+<p><strong>GREP mode</strong> lets you match regular expressions for more fine-grained control over the structure of the words. This uses the internal Python re module. No support on that here, please see the <a href="https://docs.python.org/2/library/re.html#regular-expression-syntax">official syntax reference</a>.
+</p>
 
-<p><strong>Required characters</strong></p>
-<p>Enter characters that must be contained in all returned words (comma- or space-delimited list). You can use accented characters here; please just enter the characters themselves (not their names).</p>
 
-<p><strong>Groups</strong></p>
-<p>You can define up to three groups or sets of characters, and word-o-mat will look for words that contain at least one character from each of the specified groups. You can choose from presets (letters with ascenders, descenders, arches, diagonals, and ball-and-stick letters) or just type in your own (comma- or space-delimited list). Make sure not to select groups that contradict other options (don't select lowercase groups if you want all caps).<br>
-You can use accented characters in these fields; please enter the characters themselves (not their names).</p>
+<p><strong>Options</strong></p>
+<p><strong>No repeating characters</strong>: Excludes words in which any character occurs more than once.<br />
+<p><strong>Output as list sorted by width</strong>: Puts every word on its own line and sorts the lines by width. The width of words is calculated taking spacing (sidebearings) and kerning into account; the latter assumes MetricsMachine-style kerning groups.</p>
 
-<p><strong>No repeating characters</strong></p>
-<p>Excludes words in which one or more characters occur more than once. Can be useful when generating words for sketching.</p>
 
-<p><strong>Words please!</strong></p>
-<p>Submit button. Makes words.</p>
-
-<p>--<br>Nina St&ouml;ssinger 2013&ndash;2014 / <a href="mailto:post@ninastoessinger.com">post@ninastoessinger.com</a></p>
+<p>--<br>Nina St&ouml;ssinger 2013&ndash;2015 / <a href="mailto:nina@typologic.nl">nina@typologic.nl</a></p>
 
 </body>
 </html>

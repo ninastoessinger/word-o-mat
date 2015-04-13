@@ -1,13 +1,20 @@
 import codecs
+import re
+from robofab.interface.all.dialogs import Message
 
 class wordChecker(object):
-    def __init__(self, limitToCharset, fontChars, customCharset, requiredLetters, requiredGroups, banRepetitions, minLength, maxLength):
+    def __init__(self, limitToCharset, fontChars, customCharset, requiredLetters, requiredGroups, matchPattern, banRepetitions, minLength, maxLength, matchMode="text"):
         self.limitToCharset = limitToCharset
         self.fontChars = fontChars
         self.customCharset = customCharset
-        self.requiredLetters = requiredLetters
-        self.requiredGroups = requiredGroups
         self.bannedLetters = [" "] # spaces are banned inside words
+
+        self.matchMode = matchMode
+        if self.matchMode == "text":
+            self.requiredLetters = requiredLetters
+            self.requiredGroups = requiredGroups
+        else: #grep
+            self.matchPatternRE = matchPattern
         self.banRepetitions = banRepetitions
         self.minLength = minLength
         self.maxLength = maxLength
@@ -70,16 +77,31 @@ class wordChecker(object):
     def checkExisting(self, word, outputList):
         return not word in outputList
 
+    def matchRE(self, word):
+    	if self.matchPatternRE is not None:
+	    	result = self.matchPatternRE.search(word)
+	    	if result is None:
+	    		return False
+    	return True
+
     def checkWord(self, word, outputWords):
-        requirements = [
-            (self.checkExisting, [outputWords]),    
-            (self.limitedTo, [self.fontChars, self.customCharset, self.limitToCharset]),
-            (self.checkLength, []),
-            (self.includedAll, [self.requiredLetters]),
-            (self.includedGroups, [self.requiredGroups]),
-            (self.excludedAll, [self.bannedLetters]),
-            (self.uniqueChars, [self.banRepetitions]),
-        ]
+    	requirements = [
+	           (self.checkExisting, [outputWords]),    
+	           (self.limitedTo, [self.fontChars, self.customCharset, self.limitToCharset]),
+	           (self.checkLength, []),
+	           (self.excludedAll, [self.bannedLetters]),
+	           (self.uniqueChars, [self.banRepetitions]),
+	       ]
+        if self.matchMode == "text":
+	       requirements.extend([
+	           (self.includedAll, [self.requiredLetters]),
+	           (self.includedGroups, [self.requiredGroups]),
+	       ])
+        else: # grep
+            requirements.extend([
+	           (self.matchRE, []),
+	       ])
+        #print requirements
         for reqFunc, args in requirements:
             if not reqFunc(word, *args):
                 return False
