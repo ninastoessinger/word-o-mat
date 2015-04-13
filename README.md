@@ -1,9 +1,20 @@
-word-o-mat v2.1
+word-o-mat v2.2
 ==========
 
 Looking for words that contain "q" but not "u"? Or words that use an "a", a "g", at least one ascender, and one diagonal, but not the ones you haven't drawn yet? This is the sort of thing that word-o-mat can help you with. It's an extension for RoboFont that generates words for use in type sketching, spacing, testing etc.
 
 ![word-o-mat screenshot](/screenshot.png)
+
+
+New in version 2.2:
+
+- **GREP pattern matching**: As an alternative to specifying lists of required letters, word-o-mat now supports pattern matching with regular expressions for more fine-grained control. (Please make sure your regex does not contradict parameters set in the “Basic settings” panel, as the script does not [yet] cleverly check for such things.)
+
+- **Use mark color to constrain character set** (experimental): Hit the color swatch and select a mark color used in your font (in the color interface, you can find them under Swatches > “RoboFont mark colors”). Word-o-mat will then only use glyphs marked precisely that color. Feedback on this functionality is welcome.
+
+- **Language support**: Additional option to get words in **any** available language (mind that this will be slower); new wordlists for Latin, Polish, Icelandic, Vietnamese syllables (the latter is a rather short list, but I thought it may still be useful to include); implemented correct capitalization of German ß (to SS).
+
+- Interface cleanups, improved error handling, bugfixes. I also updated the Help, in case anyone is looking at that :)
 
 
 New in version 2.1:
