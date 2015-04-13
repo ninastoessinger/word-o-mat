@@ -1,7 +1,7 @@
 word-o-mat v2.2
 ==========
 
-Looking for words that contain "q" but not "u"? Or words that use an "a", a "g", at least one ascender, and one diagonal, but not the ones you haven't drawn yet? This is the sort of thing that word-o-mat can help you with. It's an extension for RoboFont that generates words for use in type sketching, spacing, testing etc.
+Looking for words that contain "q" but not "u"? Or French words that use an "a", a "g", at least one ascender, and one diagonal, but only the ones you’ve marked green? Or words in which to test your brand new ffk ligature? This is the sort of thing that word-o-mat can help you with. It's an extension for RoboFont that generates words for use in type sketching, spacing, testing etc.
 
 ![word-o-mat screenshot](/screenshot.png)
 
