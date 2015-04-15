@@ -100,6 +100,8 @@ class WordomatWindow:
         
         # mark color selection
         self.g1.colorWell = NoneTypeColorWell((-22, 61, -0, 22))
+        self.g1.colorWell.set(None)
+        
         # populate from prefs
         if self.reqMarkColor is not "None": # initial pref
             try:
@@ -228,8 +230,14 @@ class WordomatWindow:
         for variableName, pref in prefsToLoad.iteritems():
             setattr(self, variableName, getExtensionDefault(pref))
         
-        limitPref = "com.ninastoessinger.word-o-mat.limitToCharset" # special case involving a boolean
+        # restore booleans from strings
+        limitPref = "com.ninastoessinger.word-o-mat.limitToCharset" 
         self.limitToCharset = self.readExtDefaultBoolean(getExtensionDefault(limitPref)) if CurrentFont() else False
+        
+        # parse mark color pref
+        if self.reqMarkColor is not "None":
+            self.reqMarkColor = tuple(float(i) for i in self.reqMarkColor)
+        #print "loaded mark color pref: ", self.reqMarkColor
         
         
         
