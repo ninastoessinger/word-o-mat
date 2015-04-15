@@ -235,8 +235,12 @@ class WordomatWindow:
         self.limitToCharset = self.readExtDefaultBoolean(getExtensionDefault(limitPref)) if CurrentFont() else False
         
         # parse mark color pref
+        # print "***", self.reqMarkColor
         if self.reqMarkColor is not "None":
-            self.reqMarkColor = tuple(float(i) for i in self.reqMarkColor)
+            if type(self.reqMarkColor) is tuple:
+                self.reqMarkColor = tuple(float(i) for i in self.reqMarkColor)
+            else:
+                self.reqMarkColor = "None"
         #print "loaded mark color pref: ", self.reqMarkColor
         
         
