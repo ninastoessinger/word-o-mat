@@ -1,13 +1,13 @@
 # coding=utf-8
 #
-# Tool for RoboFont to generate test words for type testing, sketching etc.
-# Default wordlist ukacd.txt is from http://www.crosswordman.com/wordlist.html
-# For other wordlists see attributions inside the respective textfiles
-# I assume no responsibility for inappropriate words found on those lists and rendered by this script :)
-#
-# v2.2 / Nina Stössinger / 13.04.2015
-# with thanks to Just van Rossum + everyone who shared words, code, ideas, time.
+"""
+word-o-mat is a RoboFont extension that generates test words for type testing, sketching etc.
+I assume no responsibility for inappropriate words found on those lists and rendered by this script :)
 
+v2.2.4 / Nina Stössinger / 31.05.2015
+Thanks to Just van Rossum, Frederik Berlaen, Tobias Frere-Jones, Joancarles Casasín, James Edmondson
+Also to Roberto Arista, Sindre Bremnes, Mathieu Christe/David Hodgetts for help with wordlists
+"""
 
 import codecs
 import re
@@ -38,13 +38,14 @@ warned = False
 class WordomatWindow:
     
     def __init__(self):
-            
+        """Initialize word-o-mat UI, open the window."""
+                    
         # load stuff
         self.loadPrefs()
         self.loadDictionaries()
         
         # Observers for font events
-        addObserver(self, "fontOpened", "fontDidOpen")
+        addObserver(self, lambda: self.g1.base.enable(True), "fontDidOpen")
         addObserver(self, "fontClosed", "fontWillClose")
         
         # The rest of this method is just building the window / interface
@@ -190,6 +191,7 @@ class WordomatWindow:
         
         
     def loadPrefs(self):
+        """Load the saved preferences into the program."""
         self.requiredLetters = []
         self.requiredGroups = [[], [], []]
         self.banRepetitions = False
@@ -246,39 +248,47 @@ class WordomatWindow:
         
         
     def baseChangeCallback(self, sender):
+        """If the selected base was changed, check if the color swatch needs to be shown/hidden."""
         colorSwatch = 1 if sender.get() == 3 else 0
         self.toggleColorSwatch(colorSwatch)
             
     def toggleColorSwatch(self, show=1):
+        """Toggle display of the mark color swatch."""
         endY = -27 if show == 1 else -0
         self.g1.base.setPosSize((0, 61, endY, 20))
         self.g1.colorWell.show(show)
             
     def switchMatchModeCallback(self, sender):
+        """Check if the UI needs toggling between text/grep mode input fields."""
         self.matchMode = "grep" if sender.get() == 1 else "text"
         self.toggleMatchModeFields()
         
     def toggleMatchModeFields(self):
+        """Toggle between showing text or grep mode input fields."""
         t = self.matchMode == "text"
         g = not t
         self.g2.textMode.show(t)
         self.g2.grepMode.show(g)
             
     def loadREReference(self, sender):
+        """Loads the RE syntax reference in a webbrowser."""
         url = "https://docs.python.org/2/library/re.html#regular-expression-syntax"
         webbrowser.open(url, new=2, autoraise=True)
         
     def readExtDefaultBoolean(self, string): 
+        """Read a Boolean saved as a string from the prefs."""
         if string == "True": 
             return True
         return False
         
     def writeExtDefaultBoolean(self, var): 
+        """Write a Boolean to the prefs as a string."""
         if var == True: 
             return "True"
         return "False"
         
     def loadDictionaries(self):
+        """Load the available wordlists and read their contents."""
         self.dictWords = {}
         self.allWords = []
         self.outputWords = []
@@ -297,7 +307,9 @@ class WordomatWindow:
             lines = fo.read()
             fo.close()
                 
-            self.dictWords[textfile] = lines.splitlines()
+            self.dictWords[textfile] = lines.splitlines() # this assumes no whitespace has to be stripped
+
+            # strip header 
             try:
                 contentStart = self.dictWords[textfile].index(contentLimit) + 1
                 self.dictWords[textfile] = self.dictWords[textfile][contentStart:]
@@ -311,6 +323,7 @@ class WordomatWindow:
         
         
     def changeSourceCallback(self, sender):
+        """On changing source/wordlist, check if a custom word list should be loaded."""
         customIndex = len(self.textfiles) + 2
         if sender.get() == customIndex: # Custom word list
             try:
@@ -323,10 +336,15 @@ class WordomatWindow:
                 fo = codecs.open(filePath, mode="r", encoding="utf-8")
                 lines = fo.read()
                 fo.close()
-                self.customWords = lines.splitlines()
+                # self.customWords = lines.splitlines()
+                self.customWords = []
+                for line in lines.splitlines():
+                    w = line.strip() # strip whitespace from beginning/end
+                    self.customWords.append(w)
                 
                     
     def fontCharacters(self, font):
+        """Check which Unicode characters are available in the font."""
         if not font:
             return []
         charset = [] 
@@ -344,6 +362,7 @@ class WordomatWindow:
     # INPUT HANDLING
         
     def getInputString(self, field, stripColon):
+        """Read an input string from a field, and convert it to a list of glyphnames."""
         inputString = field.get()
         pattern = re.compile(" *, *| +")
         if stripColon:
@@ -374,6 +393,7 @@ class WordomatWindow:
         
         
     def getIntegerValue(self, field):
+        """Get an integer value (or if not set, the placeholder) from a field."""
         try:
             returnValue = int(field.get())
         except ValueError:
@@ -385,9 +405,7 @@ class WordomatWindow:
     # INPUT CHECKING
         
     def checkReqVsFont(self, required, limitTo, fontChars, customCharset):
-        """
-        Check if a char is required from a font/selection/mark color that doesn't have it
-        """
+        """Check if a char is required from a font/selection/mark color that doesn't have it."""
         if limitTo == False:
             return True
         else:
@@ -405,8 +423,7 @@ class WordomatWindow:
         
         
     def checkReqVsLen(self, required, maxLength):
-        """
-        Check for conflicts between amount of required characters and specified word length.
+        """Check for conflicts between number of required characters and specified word length.
         Only implemented for text input for now.
         """
         if self.matchMode != "grep":
@@ -417,8 +434,9 @@ class WordomatWindow:
         
         
     def checkReqVsCase(self, required, case):
-        """
-        Check that required letters do not contradict case selection (this is a frequent source of error).
+        """Check that required letters do not contradict case selection.
+        
+        This seems to be a frequent source of user error.
         Only implemented for text mode (character list), not grep.
         """
         
@@ -446,6 +464,7 @@ class WordomatWindow:
         
         
     def checkMinVsMax(self, minLength, maxLength):
+        """Check user input for minimal/maximal word length and see if it makes sense."""
         if not minLength <= maxLength:
             Message ("word-o-mat: Confusing input for minimal/maximal word length. Please fix.")
             return False
@@ -453,6 +472,7 @@ class WordomatWindow:
         
         
     def checkRE(self):
+        """Check if the regular expression entered by the user compiles."""
         if self.matchMode == "grep":
             try:
                 self.matchPatternRE = re.compile(self.matchPattern)
@@ -467,9 +487,8 @@ class WordomatWindow:
         
         
     def checkInput(self, limitTo, fontChars, customCharset, required, minLength, maxLength, case):
-        """
-        This is where the input is run through all the individual checks above.
-        """
+        """Run the user input through all the individual checking functions."""
+        
         requirements = [  
             (self.checkReqVsLen, [required, maxLength]),
             (self.checkReqVsFont, [required, limitTo, fontChars, customCharset]),
@@ -486,6 +505,7 @@ class WordomatWindow:
     # OUTPUT SORTING
         
     def sortWordsByWidth(self, wordlist):
+        """Sort output word list by width."""
         f = CurrentFont()
         wordWidths = []
         
@@ -512,11 +532,13 @@ class WordomatWindow:
         
 
     def findKerning(self, chars):
-	    # this assumes Metrics Machine style group names:
-	    markers = ["@MMK_L_", "@MMK_R_"]
-	    keys = [c for c in chars]
+        """Helper function to find kerning between two given glyphs.
+        This assumes MetricsMachine style group names."""
+        
+        markers = ["@MMK_L_", "@MMK_R_"]
+        keys = [c for c in chars]
 	    
-	    for i in range(2):
+        for i in range(2):
 	        allGroups = self.f.groups.findGlyph(chars[i])
 	        if len(allGroups) > 0:
 	            for g in allGroups:
@@ -524,16 +546,18 @@ class WordomatWindow:
 	                    keys[i] = g
 	                    continue
 	                    
-	    key = (keys[0], keys[1])
-	    if self.f.kerning.has_key(key):
+        key = (keys[0], keys[1])
+        if self.f.kerning.has_key(key):
 	        return self.f.kerning[key]
-	    else:
+        else:
 	        return 0
                 
                 
-    # ok let's do this
-                
     def makeWords(self, sender=None):
+        """Parse user input, save new values to prefs, compile and display the resulting words.
+        
+        I think this function is too long and bloated, it should be taken apart. ########
+        """
         
         global warned
         self.f = CurrentFont()
@@ -698,18 +722,17 @@ class WordomatWindow:
         else:
             print "word-o-mat: Aborted because of errors"
     
-    
-    
-    def fontOpened(self, info):
-        self.g1.base.enable(True)
          
     def fontClosed(self, info):
+        """Check if there are any fonts left open, otherwise disable relevant UI controls."""
         if len(AllFonts()) <= 1:
             self.g1.base.set(0) # use any characters
             self.g1.base.enable(False) 
          
     def windowClose(self, sender):
+        """Remove observers when the extension window is closed."""
         removeObserver(self, "fontDidOpen")
         removeObserver(self, "fontWillClose")
+
 
 OpenWindow(WordomatWindow)

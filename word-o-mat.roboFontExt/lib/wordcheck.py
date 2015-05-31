@@ -3,6 +3,23 @@ import re
 from robofab.interface.all.dialogs import Message
 
 class wordChecker(object):
+    """Checks lists of words against a number of specified requirements.
+    
+    Attributes:
+    limitToCharset (Bool):  Signals whether output is constrained to a limited character set.
+    fontChars (list):       List of characters available in current font.
+    customCharset (list):   If applicable, a list of permissible characters words can use.
+    requiredLetters (list): Letters required in each word (text mode).
+    requiredGroups (list of lists): Groups from each of which 1 member is required (text mode).
+    matchPattern (RE):      Compiled regular expression to be matched (grep mode).
+    banRepetitions (Bool):  Signals whether repeating letters are banned.
+    minLength (int):        Minimal word length (inclusive).
+    maxLength (int):        Maximal word length (inclusive).
+    matchMode (string):     Match mode to be used ("text" or "grep").
+    
+    ##### Note for future development: ideally only *either* matchPattern or required* should be required depending on the matchMode chosen; it makes no sense to pass the other stuff into this function too.
+    """
+    
     def __init__(self, limitToCharset, fontChars, customCharset, requiredLetters, requiredGroups, matchPattern, banRepetitions, minLength, maxLength, matchMode="text"):
         self.limitToCharset = limitToCharset
         self.fontChars = fontChars
@@ -19,20 +36,24 @@ class wordChecker(object):
         self.minLength = minLength
         self.maxLength = maxLength
 
-    def excludedAll(self, word, charList):
+    def _excludedAll(self, word, charList):
+        """Check that no banned letter occurs in a given word.
+        
+        Can this be retired?"""
         for c in charList:
             if c in word:
                 return False
         return True
 
-    def includedAll(self, word, charList):
-        #word = unicode(word)
+    def _includedAll(self, word, charList):
+        """Check that all required letters occur in a given word."""
         for c in charList:
-            if not c in word: # this throws a UnicodeDecodeError when c is non-ASCII
+            if not c in word:
                 return False
         return True
 
-    def includedAny(self, word, charList):
+    def _includedAny(self, word, charList):
+        """Check that at least one letter in a group occurs in a given word."""
         if len(charList):
             for c in charList:
                 if c in word:
@@ -41,13 +62,15 @@ class wordChecker(object):
         else:
             return True
 
-    def includedGroups(self, word, charListList):
+    def _includedGroups(self, word, charListList):
+        """Check that all groups have at least one member present in a given word."""
         for charList in charListList:
-            if not self.includedAny(word, charList):
+            if not self._includedAny(word, charList):
                 return False
         return True
 
-    def limitedTo(self, word, charList, selectedCharList, condition):
+    def _limitedTo(self, word, charList, selectedCharList, condition):
+        """Check that a given word only uses the allowed scope of letters."""
         if len(selectedCharList) > 0:
             useList = selectedCharList
         else:
@@ -60,7 +83,8 @@ class wordChecker(object):
         else:
             return True
 
-    def uniqueChars(self, word, condition):
+    def _uniqueChars(self, word, condition):
+        """Check that a given word does not feature repeating characters."""
         if condition:
             wordChars = []
             for c in word:
@@ -71,37 +95,44 @@ class wordChecker(object):
         else:
             return True
 
-    def checkLength(self, word):
+    def _checkLength(self, word):
+        """Check that the length of a given word is within the allowed range."""
         return self.minLength <= len(word) <= self.maxLength
 
-    def checkExisting(self, word, outputList):
+    def _checkExisting(self, word, outputList):
+        """Check that a given word has not already been found and listed for output."""
         return not word in outputList
 
-    def matchRE(self, word):
-    	if self.matchPatternRE is not None:
-	    	result = self.matchPatternRE.search(word)
-	    	if result is None:
-	    		return False
-    	return True
+    def _matchRE(self, word):
+        """Check that a given word matches the supplied regular expression."""
+        if self.matchPatternRE is not None:
+            result = self.matchPatternRE.search(word)
+        if result is None:
+            return False
+        return True
 
     def checkWord(self, word, outputWords):
-    	requirements = [
-	           (self.checkExisting, [outputWords]),    
-	           (self.limitedTo, [self.fontChars, self.customCharset, self.limitToCharset]),
-	           (self.checkLength, []),
-	           (self.excludedAll, [self.bannedLetters]),
-	           (self.uniqueChars, [self.banRepetitions]),
-	       ]
+        """Evaluate if a given word meets all the requirements specified by the user."""
+
+        # Compile the applicable requirements
+        requirements = [
+            (self._checkExisting, [outputWords]),    
+            (self._limitedTo, [self.fontChars, self.customCharset, self.limitToCharset]),
+            (self._checkLength, []),
+            (self._excludedAll, [self.bannedLetters]),
+            (self._uniqueChars, [self.banRepetitions]),
+        ]
         if self.matchMode == "text":
-	       requirements.extend([
-	           (self.includedAll, [self.requiredLetters]),
-	           (self.includedGroups, [self.requiredGroups]),
-	       ])
+            requirements.extend([
+                (self._includedAll, [self.requiredLetters]),
+                (self._includedGroups, [self.requiredGroups]),
+            ])
         else: # grep
             requirements.extend([
-	           (self.matchRE, []),
-	       ])
-        #print requirements
+                (self._matchRE, []),
+            ])
+        
+        # Run the word through all the requirements and see if it fails
         for reqFunc, args in requirements:
             if not reqFunc(word, *args):
                 return False

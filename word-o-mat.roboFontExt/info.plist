@@ -29,9 +29,9 @@
 	<key>name</key>
 	<string>word-o-mat</string>
 	<key>timeStamp</key>
-	<real>1430765080</real>
+	<real>1433087422</real>
 	<key>version</key>
-	<string>2.2.3</string>
+	<string>2.2.4</string>
 	<key>repository</key>
     <string>ninastoessinger/word-o-mat</string>
     <key>extensionPath</key>
