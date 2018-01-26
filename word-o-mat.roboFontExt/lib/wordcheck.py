@@ -1,10 +1,10 @@
 import codecs
 import re
-from robofab.interface.all.dialogs import Message
+
 
 class wordChecker(object):
     """Checks lists of words against a number of specified requirements.
-    
+
     Attributes:
     limitToCharset (Bool):  Signals whether output is constrained to a limited character set.
     fontChars (list):       List of characters available in current font.
@@ -16,10 +16,10 @@ class wordChecker(object):
     minLength (int):        Minimal word length (inclusive).
     maxLength (int):        Maximal word length (inclusive).
     matchMode (string):     Match mode to be used ("text" or "grep").
-    
+
     ##### Note for future development: ideally only *either* matchPattern or required* should be required depending on the matchMode chosen; it makes no sense to pass the other stuff into this function too.
     """
-    
+
     def __init__(self, limitToCharset, fontChars, customCharset, requiredLetters, requiredGroups, matchPattern, banRepetitions, minLength, maxLength, matchMode="text"):
         self.limitToCharset = limitToCharset
         self.fontChars = fontChars
@@ -38,7 +38,7 @@ class wordChecker(object):
 
     def _excludedAll(self, word, charList):
         """Check that no banned letter occurs in a given word.
-        
+
         Can this be retired?"""
         for c in charList:
             if c in word:
@@ -116,7 +116,7 @@ class wordChecker(object):
 
         # Compile the applicable requirements
         requirements = [
-            (self._checkExisting, [outputWords]),    
+            (self._checkExisting, [outputWords]),
             (self._limitedTo, [self.fontChars, self.customCharset, self.limitToCharset]),
             (self._checkLength, []),
             (self._excludedAll, [self.bannedLetters]),
@@ -131,7 +131,7 @@ class wordChecker(object):
             requirements.extend([
                 (self._matchRE, []),
             ])
-        
+
         # Run the word through all the requirements and see if it fails
         for reqFunc, args in requirements:
             if not reqFunc(word, *args):
