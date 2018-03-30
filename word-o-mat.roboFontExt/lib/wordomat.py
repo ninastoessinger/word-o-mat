@@ -13,8 +13,6 @@ import codecs
 import re
 import webbrowser
 
-from fontTools.misc.py23 import unichr
-
 from lib.UI.noneTypeColorWell import NoneTypeColorWell
 from lib.UI.spaceCenter.glyphSequenceEditText import GlyphSequenceEditText
 
@@ -280,7 +278,7 @@ class WordomatWindow:
 
     def loadREReference(self, sender):
         """Loads the RE syntax reference in a webbrowser."""
-        url = "https://docs.python.org/2/library/re.html#regular-expression-syntax"
+        url = "https://docs.python.org/3.6/library/re.html#regular-expression-syntax"
         webbrowser.open(url, new=2, autoraise=True)
 
     def readExtDefaultBoolean(self, string):
@@ -358,7 +356,7 @@ class WordomatWindow:
         for g in font:
             if g.unicode is not None:
                 try:
-                    charset.append(unichr(int(g.unicode)))
+                    charset.append(chr(int(g.unicode)))
                     gnames.append(g.name)
                 except ValueError:
                     pass
@@ -384,7 +382,7 @@ class WordomatWindow:
                     if self.f.has_key(c):
                         g = self.f[c]
                         try:
-                            value = unicode(unichr(int(g.unicode)))
+                            value = chr(int(g.unicode))
                             result2.append(value)
                         except TypeError: # unicode not set
                             message ("word-o-mat: Glyph \"%s\" was found, but does not appear to have a Unicode value set. It can therefore not be processed, and will be skipped." % c)
@@ -394,7 +392,7 @@ class WordomatWindow:
                         message ("word-o-mat: Sorry, matching by glyph name is only supported when a font is open. Character \"%s\" will be skipped." % c)
             else: # character values
                 result2.append(c)
-        result = [unicode(s) for s in result2 if s]
+        result = [s for s in result2 if s]
         return result
 
 
@@ -596,7 +594,7 @@ class WordomatWindow:
                     for gname in self.f.selection:
                         if self.f[gname].unicode is not None:
                             try:
-                                self.customCharset.append(unichr(int(self.f[gname].unicode)))
+                                self.customCharset.append(chr(int(self.f[gname].unicode)))
                             except ValueError:
                                 pass
                 except AttributeError:
@@ -615,7 +613,7 @@ class WordomatWindow:
             for g in self.f:
                 if g.mark == self.reqMarkColor:
                     try:
-                        self.customCharset.append(unichr(int(g.unicode)))
+                        self.customCharset.append(chr(int(g.unicode)))
                     except:
                         pass
             if len(self.customCharset) == 0:
