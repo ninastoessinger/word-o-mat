@@ -23,8 +23,6 @@ from mojo.extensions import *
 from mojo.roboFont import OpenWindow
 from mojo.UI import OpenSpaceCenter, AccordionView
 
-from mojo.roboFont import version as RoboFontVersion
-
 from vanilla.dialogs import getFile, message
 from vanilla import *
 
@@ -381,7 +379,7 @@ class WordomatWindow:
         for c in result1:
             if len(c)>1: # glyph names
                 if self.f is not None:
-                    if self.f.has_key(c):
+                    if c in self.f:
                         g = self.f[c]
                         try:
                             value = unicode(unichr(int(g.unicode)))
@@ -553,7 +551,7 @@ class WordomatWindow:
                         continue
 
         key = (keys[0], keys[1])
-        if self.f.kerning.has_key(key):
+        if key in self.f.kerning:
             return self.f.kerning[key]
         else:
             return 0
