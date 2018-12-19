@@ -385,7 +385,6 @@ class WordomatWindow:
                         g = self.f[c]
                         try:
                             value = unichr(int(g.unicode))
-                            print(value)
                             result2.append(value)
                         except TypeError: # unicode not set
                             message ("word-o-mat: Glyph \"%s\" was found, but does not appear to have a Unicode value set. It can therefore not be processed, and will be skipped." % c)
