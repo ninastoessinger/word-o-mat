@@ -394,7 +394,7 @@ class WordomatWindow:
                         message ("word-o-mat: Sorry, matching by glyph name is only supported when a font is open. Character \"%s\" will be skipped." % c)
             else: # character values
                 result2.append(c)
-        result = [unicode(s) for s in result2 if s]
+        result = [s for s in result2 if s]
         return result
 
 
