@@ -1,5 +1,7 @@
-word-o-mat v2.2.6
+word-o-mat v3.0
 ==========
+
+**Thanks to the contributions of @arialcrime, @gferreira and @cjdunn who have helped word-o-mat work under RoboFont 3!**
 
 Looking for words that contain ‘q’ but not ‘u’? Or French words that use an ‘a’, a ‘g’, at least one ascender, and one diagonal, but only the ones you’ve marked green? Or words in which to see a specific letter combination, like ‘fk’ or ‘Yc’? This is the sort of thing that word-o-mat can help you with. It's an extension for RoboFont that generates words for use in type sketching, spacing, testing etc.
 
