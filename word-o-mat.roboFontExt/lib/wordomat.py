@@ -115,7 +115,7 @@ class WordomatWindow:
                 r, g, b, a = self.reqMarkColor
                 savedColor = NSColor.colorWithCalibratedRed_green_blue_alpha_(r, g, b, a)
                 self.g1.colorWell.set(savedColor)
-            except TypeError:
+            except:
                 pass
 
         if self.g1.base.get() != 3:
