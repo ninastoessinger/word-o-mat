@@ -83,7 +83,7 @@ class WordomatWindow:
 
         # language selection
         languageOptions = list(self.languageNames)
-        languageOptions.extend(["OSX Dictionary", "Any language", "Custom wordlist..."])
+        languageOptions.extend(["OSX Dictionary", "Custom wordlist..."])
         self.g1.source = PopUpButton((0, 32, 85, 20), [], sizeStyle="small", callback=self.changeSourceCallback)
         self.g1.source.setItems(languageOptions)
         self.g1.source.set(int(self.source))
@@ -110,7 +110,7 @@ class WordomatWindow:
         self.g1.colorWell.set(None)
 
         # populate from prefs
-        if self.reqMarkColor is not "None": # initial pref
+        if self.reqMarkColor != "None": # initial pref
             try:
                 r, g, b, a = self.reqMarkColor
                 savedColor = NSColor.colorWithCalibratedRed_green_blue_alpha_(r, g, b, a)
@@ -244,7 +244,7 @@ class WordomatWindow:
 
         # parse mark color pref
         # print("*** %s" % self.reqMarkColor)
-        if self.reqMarkColor is not "None":
+        if self.reqMarkColor != "None":
             if type(self.reqMarkColor) is tuple:
                 self.reqMarkColor = tuple(float(i) for i in self.reqMarkColor)
             else:
@@ -297,8 +297,8 @@ class WordomatWindow:
         self.allWords = []
         self.outputWords = []
 
-        self.textfiles = ['catalan', 'czech', 'danish', 'dutch', 'ukacd', 'finnish', 'french', 'german', 'hungarian', 'icelandic', 'italian', 'latin', 'norwegian', 'polish', 'slovak', 'spanish', 'vietnamese']
-        self.languageNames = ['Catalan', 'Czech', 'Danish', 'Dutch', 'English', 'Finnish', 'French', 'German', 'Hungarian', 'Icelandic', 'Italian', 'Latin', 'Norwegian', 'Polish', 'Slovak', 'Spanish', 'Vietnamese syllables']
+        self.textfiles = ['catalan', 'czech', 'danish', 'dutch', 'ukacd', 'finnish', 'french', 'german', 'hungarian', 'icelandic', 'italian', 'latin', 'norwegian', 'polish', 'slovak', 'spanish', 'vietnamese', 'any_latin', '', 'greek', '', 'belarusian', 'bulgarian', 'kazakh', 'macedonian', 'mongolian', 'russian', 'serbian', 'tajik', 'ukrainian', 'any_cyrillic', '', 'any_language']
+        self.languageNames = ['Catalan', 'Czech', 'Danish', 'Dutch', 'English', 'Finnish', 'French', 'German', 'Hungarian', 'Icelandic', 'Italian', 'Latin', 'Norwegian', 'Polish', 'Slovak', 'Spanish', 'Vietnamese', 'Any Latin', '---', 'Greek', '---', 'Belarusian', 'Bulgarian', 'Kazakh', 'Macedonian', 'Mongolian', 'Russian', 'Serbian', 'Tajik', 'Ukrainian', 'Any Cyrillic', '---', 'Any language']
         self.source = getExtensionDefault("com.ninastoessinger.word-o-mat.source", 4)
 
         bundle = ExtensionBundle("word-o-mat")
@@ -306,7 +306,11 @@ class WordomatWindow:
 
         # read included textfiles
         for textfile in self.textfiles:
+            if not textfile:
+                continue
             path = bundle.getResourceFilePath(textfile)
+            if path is None:
+                continue
             with codecs.open(path, mode="r", encoding="utf-8") as fo:
                 lines = fo.read()
 
@@ -319,6 +323,17 @@ class WordomatWindow:
             except ValueError:
                 pass
 
+        # build combined wordlists
+        self.dictWords['any_latin'] = []
+        for tf in self.textfiles[:self.textfiles.index('any_latin')]:
+            if tf in self.dictWords:
+                self.dictWords['any_latin'].extend(self.dictWords[tf])
+        self.dictWords['any_cyrillic'] = []
+        for tf in self.textfiles[self.textfiles.index('greek')+1:self.textfiles.index('any_cyrillic')]:
+            if tf in self.dictWords:
+                self.dictWords['any_cyrillic'].extend(self.dictWords[tf])
+        self.dictWords['any_language'] = self.dictWords['any_latin'] + self.dictWords.get('greek', []) + self.dictWords['any_cyrillic']
+
         # read user dictionary
         with open('/usr/share/dict/words', 'r') as userFile:
             lines = userFile.read()
@@ -327,7 +342,7 @@ class WordomatWindow:
 
     def changeSourceCallback(self, sender):
         """On changing source/wordlist, check if a custom word list should be loaded."""
-        customIndex = len(self.textfiles) + 2
+        customIndex = len(self.textfiles) + 1
         if sender.get() == customIndex: # Custom word list
             try:
                 filePath = getFile(title="Load custom word list", messageText="Select a text file with words on separate lines", fileTypes=["txt"])[0]
@@ -634,11 +649,7 @@ class WordomatWindow:
         languageCount = len(self.textfiles)
         if self.source == languageCount: # User Dictionary
             self.allWords = self.dictWords["user"]
-        elif self.source == languageCount+1: # Use all languages
-            for i in range(languageCount):
-                # if any language: concatenate all the wordlists
-                self.allWords.extend(self.dictWords[self.textfiles[i]])
-        elif self.source == languageCount+2: # Custom word list
+        elif self.source == languageCount+1: # Custom word list
             try:
                 if self.customWords != []:
                     self.allWords = self.customWords

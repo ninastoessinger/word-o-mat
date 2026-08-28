@@ -1,4 +1,4 @@
-word-o-mat v3.0
+word-o-mat v3.2
 ==========
 
 **Thanks to the contributions of @arialcrime, @gferreira and @cjdunn who have helped word-o-mat work under RoboFont 3!**
@@ -26,6 +26,7 @@ Extended Language Support:
 
 - word-o-mat is UTF-8 compliant, so you can also use it for languages other than English (I’ve only tested it for Latin-based languages for now). This uses the Unicode info of the glyphs, so make sure you have your codepoints assigned properly.
 
-- Ships with built-in word lists for: *English*, *Catalan*, Czech, Danish, *Dutch*, Finnish, *French*, *German*, Hungarian, Icelandic, *Italian*, *Latin*, *Norwegian*, Polish, Slovak, Spanish, and Vietnamese syllables. Word lists usually contain between 5.000 and 30.000 words each (only the Vietnamese one is much shorter) and are derived from various open/CC licensed sources; please check the individual files for details. Some of these word lists still contain errors and stray words from other languages; the ones italicized above have been manually checked and fixed: German & Dutch (Nina Stössinger),  Norwegian (Sindre Bremnes of [Monokrom](https://monokrom.no/)), French ([La Police Type Foundry](https://github.com/LaPolice) with David Hodgetts), Catalan ([Joancarles Casasín](https://github.com/casasin)), Italian ([Roberto Arista](https://github.com/roberto-arista)), and Latin which was greatly expanded/improved by [Tobias Frere-Jones](http://www.frerejones.com/). Thanks! – You can also use custom wordlists. (For best results use UTF-8 encoding.) 
+- Ships with built-in word lists for: *English*, *Catalan*, Czech, Danish, *Dutch*, Finnish, *French*, *German*, Hungarian, Icelandic, *Italian*, *Latin*, *Norwegian*, Polish, Slovak, Spanish. Word lists usually contain between 5.000 and 30.000 words each and are derived from various open/CC licensed sources; please check the individual files for details. Some of these word lists still contain errors and stray words from other languages; the ones italicized above have been manually checked and fixed: German & Dutch (Nina Stössinger),  Norwegian (Sindre Bremnes of [Monokrom](https://monokrom.no/)), French ([La Police Type Foundry](https://github.com/LaPolice) with David Hodgetts), Catalan ([Joancarles Casasín](https://github.com/casasin)), Italian ([Roberto Arista](https://github.com/roberto-arista)), and Latin which was greatly expanded/improved by [Tobias Frere-Jones](http://www.frerejones.com/). Thanks! – You can also use custom wordlists. (For best results use UTF-8 encoding.) 
+- Belarusian, Bulgarian, Kazakh, Macedonian, Mongolian, Russian, Serbian, Tajik, Ukrainian and Greek added and Vietnamese updated by [Wei Huang](https://github.com/weiweihuanghuang/) based on [Leipzig Corpora Collection](https://wortschatz.uni-leipzig.de/).
 
 If you find any bugs or have suggestions for future development, please get in touch, or fix them yourself :)
